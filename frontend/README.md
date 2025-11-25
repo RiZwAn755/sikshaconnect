@@ -1,16 +1,33 @@
-# React + Vite
+# 🕊️ SikhshaConnect
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SikhshaConnect is a lightweight study & social tracking app that helps students register with unique usernames, find and add friends, run focused study timers with notes, auto-share sessions with friends and send reminders — plus a relax mode with music & podcasts.
 
-Currently, two official plugins are available:
+![Project Structure](/mnt/data/1e1675f7-6282-4cb0-b435-5cc5288d63e9.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🚀 Key Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- User registration with unique username
+- Search users by username
+- Send / accept / reject friend requests
+- Study timer (Pomodoro-style)
+- Attach notes to each timer session
+- Auto-send session summaries to friends
+- Send reminders to friends
+- Relax mode with music & podcasts
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠 Tech Stack
+
+- **Frontend:** React (Vite), React Router, TailwindCSS / plain CSS  
+- **Backend:** Node.js, Express.js  
+- **Database:** MongoDB + Mongoose  
+- **Auth:** JWT (httpOnly cookies recommended)  
+- **Realtime / Notifications (optional):** Socket.io / Cron / Nodemailer
+
+---
+
+## 📁 Project Structure (as in repo)
+
