@@ -1,0 +1,1 @@
+// all .env variables will be here
