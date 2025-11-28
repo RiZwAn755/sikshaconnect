@@ -20,12 +20,12 @@ import User from '../models/user.model.js';
 
  export const login  = async (req, resp) => {
     const {username , password} = req.body;
-    const res = await User.findOne({username, password});
+    const res = await User.findOne({username, password}).explain("executionStats");
     if(!res){
         resp.status(401).send("user not found");
     }
     
-    resp.status(200).send("login succuessfull");
+    resp.status(200).json({response:res , message:"login successfull"});
  };
 
 
