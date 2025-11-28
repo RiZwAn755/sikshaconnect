@@ -44,5 +44,6 @@ const userSchema = new mongoose.Schema({
 
 });
 
+userSchema.index({ username: 1 , password: 1});
 const User = mongoose.model("User", userSchema);
 export default User;
