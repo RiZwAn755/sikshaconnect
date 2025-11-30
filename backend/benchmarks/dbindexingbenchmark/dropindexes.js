@@ -1,6 +1,6 @@
 
-import User from "./models/user.model.js";
-import "./config/db.js";
+import User from "../../models/user.model.js";
+import "../../config/db.js";
 
 (async () => {
   console.log("Fetching all indexes...");
