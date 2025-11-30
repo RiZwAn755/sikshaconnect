@@ -44,6 +44,6 @@ const userSchema = new mongoose.Schema({
 
 });
 
-userSchema.index({ username: 1 , password: 1});
+userSchema.index({ username: 1 , password: 1}); // compound indexing
 const User = mongoose.model("User", userSchema);
 export default User;
