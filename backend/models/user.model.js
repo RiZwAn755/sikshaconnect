@@ -19,14 +19,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // friend list
+ 
   friendlist: [
   {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
   }
 ],
-//  Incoming friend requests
+
   friendRequests: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,16 +34,21 @@ const userSchema = new mongoose.Schema({
     }
   ],
 
-  //  Requests user has sent to others
+  
   sentRequests: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"
     }
-  ]
+  ],
+
+  
+   refreshToken:{
+    type: String
+   }
 
 });
 
-userSchema.index({ username: 1 , password: 1}); // compound indexing
+userSchema.index({ username: 1}); 
 const User = mongoose.model("User", userSchema);
 export default User;
