@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
-import User from "./models/user.model.js";  // adjust path if needed
-import "./config/db.js";  // ensure DB connection is established
 
-// Helper to measure execution time
+import User from "./models/user.model.js";  
+import "./config/db.js"; 
+
+// function to measure execution time
 async function benchmark(label, fn) {
   const start = performance.now();
   await fn();

@@ -2,12 +2,8 @@
 
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-} from "../utils/generatetokens.js";
-import { refresh_token_secret } from "../config/config.js";
-import jwt from "jsonwebtoken";
+import {generateAccessToken,generateRefreshToken,} from "../utils/generatetokens.js";
+
 
 export const signup = async (req, resp) => {
   try {
@@ -67,40 +63,12 @@ export const login = async (req, resp) => {
       secure: false,
       sameSite: "lax",
     });
-    resp.status(200).json({ message: "login successfull" });
+    resp.status(200).json({ message: "login successfull" , token : accessToken});
   } catch (error) {
     resp.status(500).json({ message: "login failed", error: error.message });
   }
 };
 
-///  refresh token
-
-// export const refreshToken = async (req, resp) => {
-//   const oldRefreshToken = req.cookies.refreshToken;
-//   if (!oldRefreshToken)
-//     return resp.status(401).json({ message: "no refresh token" });
-
-//   const user = await User.findOne({ refreshToken: oldRefreshToken });
-//   if (!user) return resp.status(403).json({ message: "invalid refresh token" });
-
-//   jwt.verify(oldRefreshToken, refresh_token_secret, async (err, decoded) => {
-//     if (err) return resp.status(403).json({ message: "expired refresh token" });
-
-//     // genrate karo new token
-//     const newAccessToken = generateAccessToken(user.username);
-//     const newRefreshToken = generateRefreshToken(user.username);
-
-//     user.refreshToken = newRefreshToken;
-//     await user.save();
-
-//     resp.cookie("accessToken", newAccessToken, { httpOnly: true });
-//     resp.cookie("refreshToken", newRefreshToken, { httpOnly: true });
-
-//     resp.json({ message: "tokens refreshed" });
-//   });
-// };
-
-///    logout
 
 export const logout = async (req, resp) => {
   const refreshToken = req.cookies.refreshToken;

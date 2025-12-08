@@ -1,10 +1,9 @@
-
-
+import Login from "./components/auth/login"
 function App() {
 
   return (
     <>
-       siksha connect
+       <Login/>
     </>
   )
 }
