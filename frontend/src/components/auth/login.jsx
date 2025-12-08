@@ -1,13 +1,15 @@
 import { useState} from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
    const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
 
     const baseurl = import.meta.env.VITE_BASE_URL;
-      
     const formData = {username , password};
 
      const handleSubmit = async (e) =>{
@@ -26,7 +28,8 @@ import axios from "axios";
          console.log("unable to login");
        }else{
          console.log("login successfull");
-         Cookies.set("token", res.data.token);         
+         Cookies.set("token", res.data.token);  
+         navigate('/');       
        }
     }
 
