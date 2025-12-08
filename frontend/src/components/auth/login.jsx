@@ -1,4 +1,5 @@
-import { useState, useEffect} from "react";
+import { useState} from "react";
+import Cookies from "js-cookie";
 import axios from "axios";
 
    const Login = () => {
@@ -11,28 +12,23 @@ import axios from "axios";
 
      const handleSubmit = async (e) =>{
        e.preventDefault();
-       console.log(baseurl);
-       console.log( username, password);
        if(!formData.username || !formData.password){
         alert("username and password is required");
        }
-
        const res = await axios.post(`${baseurl}/api/auth/login`,{
-        headers:{
-             "Content-Type":"application/json",
-        },
-        body:formData
+            username:formData.username,
+            password:formData.password
        })
 
+      //  console.log(res);
+       
        if(!res){
-        alert("unable to login ");
+         console.log("unable to login");
+       }else{
+         console.log("login successfull");
+         Cookies.set("token", res.data.token);         
        }
-       else {
-        alert("login successfull");
-        console.log(res.token);
-        }
     }
-
 
     return (
 
