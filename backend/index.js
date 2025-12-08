@@ -4,6 +4,9 @@ import cluster from 'cluster';
 import os from 'os';
 import app from './server.js';
 
+app.get("/", (req, resp) => {
+    resp.send("hii");
+})
 // const numcpus = os.cpus().length;
 // console.log(numcpus);
 
