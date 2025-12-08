@@ -12,10 +12,6 @@
       "src": "/api/(.*)",
       "dest": "/backend/index.js"
     }
-  ],
-  "env": {
-    "MONGO_URI": "@MONGO_URI",
-    "REFRESH_SECRET": "@REFRESH_SECRET",
-    "ACCESS_SECRET": "@ACCESS_SECRET"
-  }
+  ]
+ 
 }
