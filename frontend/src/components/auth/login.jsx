@@ -30,7 +30,7 @@ const Login = () => {
         alert("Login failed");
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
       alert("Login error");
     }
   };
@@ -63,7 +63,9 @@ const Login = () => {
               Login
             </button>
           </form>
+          
         </div>
+         <button onClick={()=>navigate('/forgot-pass')}>forgot password</button>
       </div>
     </main>
   );
