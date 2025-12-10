@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 
 const Nav = () => {
     return (
@@ -9,9 +10,9 @@ const Nav = () => {
                 </div>
 
                 <nav className="hidden sm:flex gap-6 text-sm">
-                    <a href="#" className="hover:text-red-500">Home</a>
-                    <a href="#" className="hover:text-red-500">Friends</a>
-                    <a href="#" className="hover:text-red-500">Profile</a>
+                    <Link to = '/' >Home</Link>
+                    <Link to = '/friends' >Friends</Link>
+                    <Link to = '/profile' >Profile</Link>
                 </nav>
 
                 <div className="sm:hidden">

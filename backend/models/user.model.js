@@ -19,30 +19,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
- 
-  friendlist: [
-  {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  }
-],
-
-  friendRequests: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-    }
-  ],
-
-  
-  sentRequests: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-    }
-  ],
-
-  
    refreshToken:{
     type: String
    }
