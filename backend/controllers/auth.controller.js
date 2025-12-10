@@ -2,7 +2,10 @@
 
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-import {generateAccessToken,generateRefreshToken,} from "../utils/generatetokens.js";
+import jwt from "jsonwebtoken";
+import SendEmail from "../utils/sendemail.js";
+import {generateAccessToken,generateRefreshToken, generateResetToken} from "../utils/generatetokens.js";
+import { reset_token_secret } from "../config/config.js";
 
 
 export const signup = async (req, resp) => {
@@ -84,3 +87,55 @@ export const logout = async (req, resp) => {
 
   resp.json({ message: "logged out successfully" });
 };
+
+
+
+export const forgotPassword= async( req, resp)=>{
+     const {email}= req.body;
+
+     const user = await User.findOne({email});
+     if(!user) return resp.json({message: "If email exists, reset link sent"});
+
+     const token = generateResetToken(user._id);
+     const resetURL =`http://localhost:5173/reset-password/${token}`
+
+     await SendEmail({
+        to: email,
+        subject: "Reset Your Password",
+
+        html: `
+         <p>Reset your password </p>
+         <a href="${resetURL}">${resetURL}</a>
+         `
+
+     })
+     console.log("Generated token:", token);
+
+     resp.json({message: "if email exist , reset link sent"});
+
+}
+
+
+export const resetPassword = async(req, resp)=>{
+  const {token} = req.params;
+  const {newPassword} = req.body;
+
+  if(!newPassword) return resp.status(400).json({message: "missing new password"});
+  if(!token) return resp.status(400).json({message: "invalid or missing token"});
+
+  try{
+    const decoded = jwt.verify(token ,reset_token_secret);
+    console.log("Decoded token:", decoded);
+
+    const user = await User.findById(decoded.id);
+    if(!user) return resp.status(400).json({message: "user not found"});
+    
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    await user.save();
+    resp.json({message: "password reset successfully"});
+  } catch(err){
+     resp.status(400).json({message:"token expired or invalid"});
+  }
+
+}
