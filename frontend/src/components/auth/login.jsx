@@ -13,7 +13,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !password) {
-      alert("username and password are required");
+      alert("Username and password are required");
       return;
     }
 
@@ -36,41 +36,80 @@ const Login = () => {
   };
 
   return (
-    <main className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-full max-w-md px-6 py-8">
-        <div className="bg-black text-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-red-500">Sign in</h2>
-          <p className="text-sm text-gray-200 mt-2">Welcome back — enter your credentials</p>
+    <main className="min-h-screen bg-white flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] p-8">
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <input
-              className="w-full px-4 py-2 rounded-sm bg-white text-black placeholder-gray-500"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              type="text"
-              placeholder="Username"
-            />
+         
+          <h2 className="text-2xl font-semibold text-gray-900 text-center tracking-tight">
+            Welcome Back
+          </h2>
 
-            <input
-              className="w-full px-4 py-2 rounded-sm bg-white text-black placeholder-gray-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              placeholder="Password"
-            />
+          <p className="text-center text-sm text-gray-500 mt-2">
+            Please sign in to continue
+          </p>
 
-            <button className="w-full py-2 bg-red-500 text-black font-semibold rounded-sm" type="submit">
+         
+          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+
+           
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Username
+              </label>
+              <input
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-black 
+                           placeholder-gray-500 focus:outline-none focus:ring-2 
+                           focus:ring-red-600 focus:border-red-600 transition-all"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                type="text"
+                placeholder="Enter username"
+              />
+            </div>
+
+           
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-black 
+                           placeholder-gray-500 focus:outline-none focus:ring-2 
+                           focus:ring-red-600 focus:border-red-600 transition-all"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
+                placeholder="Enter password"
+              />
+            </div>
+
+           
+            <button
+              className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl 
+                         text-lg transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+              type="submit"
+            >
               Login
             </button>
           </form>
+
           
+          <p className="text-center text-sm text-gray-600 mt-4">
+            Forgot your password?{" "}
+            <span
+              onClick={() => navigate("/forgot-pass")}
+              className="text-red-600 font-medium hover:underline cursor-pointer"
+            >
+              Reset here
+            </span>
+          </p>
+
         </div>
-         <button onClick={()=>navigate('/forgot-pass')}>forgot password</button>
       </div>
     </main>
   );
 };
 
 export default Login;
-
-
