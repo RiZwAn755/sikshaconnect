@@ -7,18 +7,31 @@ import {BrowserRouter as Router, Routes, Route} from "react-router-dom"
 import PayButton from "./components/payments/paybutton"
 import Nav from "./components/utils/navbar"
 import Footer from "./components/utils/footer"
+import PrivateComponent from "./components/auth/privatecomponent"
+import Landing from "./components/utils/landing"
+import NotFound from "./components/utils/404"
+import FriendList from "./components/friends/friendlist"
+import Profile from "./components/user/profile"
 
 function App() {
   return (
       <Router>
       <Nav />
       <Routes>
+        <Route path = '/landing' element= {<Landing/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/signup' element={<Register/>} />
-        <Route path='/' element={<Home/>} />
-        <Route path='/paybutton' element={<PayButton amountvalue={25} />} />
-        <Route path ="forgot-pass" element ={<ForgotPassword/>}/>
+        <Route path ="/forgot-pass" element ={<ForgotPassword/>}/>
         <Route path ="/reset-password/:token" element ={<ResetPassword/>}/>
+        <Route path ="/*" element ={<NotFound/>}/>
+
+       < Route element = {<PrivateComponent/>}>
+                <Route path='/paybutton' element={<PayButton amountvalue={25} />} />
+                 <Route path='/' element={<Home/>} />
+                 <Route path='/friends' element={<FriendList/>} />
+                 <Route path = '/profile' element = {<Profile/>} />
+       </Route>
+
       </Routes>
       <Footer />
     </Router>

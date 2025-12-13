@@ -97,7 +97,7 @@ export const forgotPassword= async( req, resp)=>{
      if(!user) return resp.json({message: "If email exists, reset link sent"});
 
      const token = generateResetToken(user._id);
-     const resetURL =`http://localhost:5173/reset-password/${token}`
+     const resetURL =`http://localhost:5173/reset-password/${token}` // ya frontend ka url 
 
      await SendEmail({
         to: email,
