@@ -25,6 +25,7 @@ const Login = () => {
 
       if (res?.data?.token) {
         Cookies.set("token", res.data.token);
+        localStorage.setItem("username", res.data.username);
         navigate("/");
       } else {
         alert("Login failed");

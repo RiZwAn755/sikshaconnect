@@ -14,7 +14,7 @@ const istokenValid = (accessToken) =>{
 
 const PrivateComponent = () =>{
      const accessToken = Cookies.get("token");
-     return  istokenValid(accessToken) ? <Outlet/> : <Navigate to="/login" />
+     return  istokenValid(accessToken) ? <Outlet/> : <Navigate to="/landing" />
 }
 
 export default PrivateComponent ;
