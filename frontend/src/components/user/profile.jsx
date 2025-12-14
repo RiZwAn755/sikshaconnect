@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import Logout from "../auth/logout";
+import Loader from "../utils/loader";
 
 const baseurl = import.meta.env.VITE_BASE_URL;
 
@@ -18,8 +20,8 @@ const Profile = () => {
         let mounted = true;
         const fetchUser = async () => {
             try {
-                const res = await axios.get(`${baseurl}/api/user/${username}`);
-                if (mounted) setUser(res.data || res.data.user || null);
+                const res = await axios.get(`${baseurl}/api/user/me`, { params: { username }});
+                if (mounted) setUser(res.data?.user ?? res.data ?? null);
             } catch (err) {
                 console.error("Failed to load user profile:", err);
             } finally {
@@ -34,11 +36,7 @@ const Profile = () => {
     }, [username]);
 
     if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-white">
-                <div className="text-center text-black">Loading profile...</div>
-            </div>
-        );
+        return <Loader text="Fetching data" />;
     }
 
     if (!username) {
@@ -66,16 +64,17 @@ const Profile = () => {
                             <p className="mt-2 text-sm">@{user?.username || username}</p>
                             {user?.email && <p className="mt-1 text-sm">{user.email}</p>}
 
-                            <div className="mt-6 flex flex-wrap gap-3">
-                                <Link to="/profile/edit" className="px-4 py-2 bg-red-500 text-black rounded-sm">Edit Profile</Link>
-                                <Link to="/friends" className="px-4 py-2 border border-white rounded-sm">Friends</Link>
+                            <div className="mt-3 flex flex-wrap gap-3">
+                                <Logout/>
+                                <Link to="/profile/edit" className="px-4 py-2 border border-white rounded-sm">Edit Profile</Link>
+                                <Link to="/friends" className="px-4 py-2 border border-white rounded-sm">Friends: {user?.friends?.length ?? 0}</Link>
                             </div>
                         </div>
                     </div>
 
                     <div className="mt-8 text-white">
-                        <h2 className="text-lg font-semibold">About</h2>
-                        <p className="mt-2 text-sm">{user?.bio || "No bio yet."}</p>
+                       
+                     
                     </div>
                 </div>
             </section>

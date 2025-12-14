@@ -11,7 +11,6 @@ router.post("/login", login);
 router.get("/logout", logout);
 router.post("/forgot-password",forgotPassword);
 router.post("/reset-password/:token",resetPassword);
-
 router.get("/testAuth", authMiddleware, (req, res) => {
   res.json({ message: "Protected route", username: req.username });
 });
