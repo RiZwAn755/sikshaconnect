@@ -1,20 +1,37 @@
-import {Navigate , Outlet} from 'react-router-dom';
+import { Navigate, Outlet } from "react-router-dom";
 import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
 
-const istokenValid = (accessToken) =>{
-   if(!accessToken ||accessToken === 'undefined')return false;
-    const expTime = JSON.parse(atob(accessToken.split('.')[1]));
-    const ex = expTime.exp*1000;
-
-    if(ex <= Date.now()){
+const isTokenValid = (accessToken) => {
+    if (!accessToken || accessToken === "undefined") return false;
+    try {
+        const payload = accessToken.split(".")[1];
+        const decoded = JSON.parse(atob(payload));
+        const expMs = (decoded.exp || 0) * 1000;
+        return expMs > Date.now();
+    } catch (e) {
         return false;
     }
-    else return true;
-}
+};
 
-const PrivateComponent = () =>{
-     const accessToken = Cookies.get("token");
-     return  istokenValid(accessToken) ? <Outlet/> : <Navigate to="/landing" />
-}
+const PrivateComponent = () => {
+    const accessToken = Cookies.get("token");
+    const valid = isTokenValid(accessToken);
+    const [shouldRedirect, setShouldRedirect] = useState(false);
+    const [alertShown, setAlertShown] = useState(false);
 
-export default PrivateComponent ;
+    useEffect(() => {
+        if (!valid && !alertShown) {
+            // show message once, then redirect
+            alert("login karo pahle");
+            setAlertShown(true);
+            setShouldRedirect(true);
+        }
+    }, [valid, alertShown]);
+
+    if (valid) return <Outlet />;
+    if (shouldRedirect) return <Navigate to="/login" replace />;
+    return null;
+};
+
+export default PrivateComponent;

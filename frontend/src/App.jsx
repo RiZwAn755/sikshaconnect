@@ -12,6 +12,7 @@ import Landing from "./components/utils/landing"
 import NotFound from "./components/utils/404"
 import FriendList from "./components/friends/friendlist"
 import Profile from "./components/user/profile"
+import Logout from "./components/auth/logout"
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
                  <Route path='/' element={<Home/>} />
                  <Route path='/friends' element={<FriendList/>} />
                  <Route path = '/profile' element = {<Profile/>} />
+                 <Route path="/logout" element = {<Logout/>} />
        </Route>
 
       </Routes>
