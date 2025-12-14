@@ -22,10 +22,11 @@ const Login = () => {
         username,
         password,
       });
-
+        
       if (res?.data?.token) {
         Cookies.set("token", res.data.token);
-        localStorage.setItem("username", res.data.username);
+        localStorage.setItem("username", username);
+
         navigate("/");
       } else {
         alert("Login failed");
