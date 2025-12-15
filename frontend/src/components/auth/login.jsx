@@ -2,13 +2,12 @@ import { useState } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+const baseurl = import.meta.env.VITE_BASE_URL;
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
-  const baseurl = import.meta.env.VITE_BASE_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,13 +15,11 @@ const Login = () => {
       alert("Username and password are required");
       return;
     }
-
     try {
       const res = await axios.post(`${baseurl}/api/auth/login`, {
         username,
         password,
       });
-        
       if (res?.data?.token) {
         Cookies.set("token", res.data.token);
         localStorage.setItem("userid", res.data.userid);
@@ -40,10 +37,10 @@ const Login = () => {
   return (
     <main className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        
+
         <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] p-8">
 
-         
+
           <h2 className="text-2xl font-semibold text-gray-900 text-center tracking-tight">
             Welcome Back
           </h2>
@@ -51,11 +48,7 @@ const Login = () => {
           <p className="text-center text-sm text-gray-500 mt-2">
             Please sign in to continue
           </p>
-
-         
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-
-           
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Username
@@ -70,8 +63,6 @@ const Login = () => {
                 placeholder="Enter username"
               />
             </div>
-
-           
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Password
@@ -86,8 +77,6 @@ const Login = () => {
                 placeholder="Enter password"
               />
             </div>
-
-           
             <button
               className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl 
                          text-lg transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
@@ -97,7 +86,6 @@ const Login = () => {
             </button>
           </form>
 
-          
           <p className="text-center text-sm text-gray-600 mt-4">
             Forgot your password?{" "}
             <span

@@ -1,6 +1,6 @@
 
-import User from "./models/user.model.js";  
-import "./config/db.js"; 
+import User from "./models/user.model.js";
+import "./config/db.js";
 
 // function to measure execution time
 async function benchmark(label, fn) {

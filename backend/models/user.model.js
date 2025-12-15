@@ -19,13 +19,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-   refreshToken:{
+  refreshToken: {
     type: String
-   },
-    friends: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-      default: []
-    }
+  },
+  friends: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    default: []
+  }
 
 });
 
