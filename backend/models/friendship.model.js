@@ -3,14 +3,14 @@ import mongoose from 'mongoose';
 
 const friendshipSchema = new mongoose.Schema({
 
-    User1 :{
+    user1 :{
         type : mongoose.Schema.Types.ObjectId,
-        ref:'User',
+        ref:'users',
         required:true
     },
-    User2 :{
+    user2 :{
         type :mongoose.Schema.Types.ObjectId,
-        ref:User,
+        ref:'users',
         required:true
     },
     connectedAt : {
@@ -18,7 +18,7 @@ const friendshipSchema = new mongoose.Schema({
     },
     status:{
         type:String,
-        enum:['Accepted', 'Pending', 'Rejected'],
+        enum:["Accepted", "Requested", "Rejected"],
         required:true,
     },
     streak:{
@@ -28,7 +28,7 @@ const friendshipSchema = new mongoose.Schema({
     },
     currentTask:{
         type: mongoose.Schema.Types.ObjectId,
-        ref:'Task',
+        ref:'tasks',
         default:null,
     }
 

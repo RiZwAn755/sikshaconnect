@@ -25,7 +25,7 @@ const Login = () => {
         
       if (res?.data?.token) {
         Cookies.set("token", res.data.token);
-        localStorage.setItem("username", username);
+        localStorage.setItem("userid", res.data.userid);
 
         navigate("/");
       } else {

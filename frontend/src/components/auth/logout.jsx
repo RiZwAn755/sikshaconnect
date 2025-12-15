@@ -11,7 +11,7 @@ const Logout = () => {
        const res = await axios.get(`${baseurl}/api/auth/logout`)
        if(res){
         Cookies.remove('token');
-        localStorage.removeItem('username');
+        localStorage.removeItem('userid');
         navigate('/landing');
        }else{
         return {"message":"unable to logout"};

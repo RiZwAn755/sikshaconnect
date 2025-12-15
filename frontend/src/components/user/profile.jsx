@@ -5,41 +5,45 @@ import Logout from "../auth/logout";
 import Loader from "../utils/loader";
 
 const baseurl = import.meta.env.VITE_BASE_URL;
+const userid = localStorage.getItem("userid");
 
 const Profile = () => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const username = localStorage.getItem("username");
+
 
     useEffect(() => {
-        if (!username) {
-            setLoading(false);
-            return;
-        }
-
-        let mounted = true;
         const fetchUser = async () => {
             try {
-                const res = await axios.get(`${baseurl}/api/user/me`, { params: { username }});
-                if (mounted) setUser(res.data?.user ?? res.data ?? null);
+
+                if (!userid) {
+                    setUser(null);
+                    setLoading(false);
+                    return;
+                }
+
+                const res = await axios.get(`${baseurl}/api/user/me`, {
+                    params: { userid },
+                });
+
+                setUser(res.data);
             } catch (err) {
-                console.error("Failed to load user profile:", err);
+                console.error("Failed to load profile:", err);
+                setUser(null);
             } finally {
-                if (mounted) setLoading(false);
+                setLoading(false);
             }
         };
 
         fetchUser();
-        return () => {
-            mounted = false;
-        };
-    }, [username]);
+    }, []);
+
 
     if (loading) {
         return <Loader text="Fetching data" />;
     }
 
-    if (!username) {
+    if (!userid) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
                 <div className="text-center">
@@ -65,7 +69,7 @@ const Profile = () => {
                             {user?.email && <p className="mt-1 text-sm">{user.email}</p>}
 
                             <div className="mt-3 flex flex-wrap gap-3">
-                                <Logout/>
+                                <Logout />
                                 <Link to="/profile/edit" className="px-4 py-2 border border-white rounded-sm">Edit Profile</Link>
                                 <Link to="/friends" className="px-4 py-2 border border-white rounded-sm">Friends: {user?.friends?.length ?? 0}</Link>
                             </div>
@@ -73,8 +77,8 @@ const Profile = () => {
                     </div>
 
                     <div className="mt-8 text-white">
-                       
-                     
+
+
                     </div>
                 </div>
             </section>

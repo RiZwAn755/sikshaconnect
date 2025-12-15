@@ -8,6 +8,7 @@ import {generateAccessToken,generateRefreshToken, generateResetToken} from "../u
 import { reset_token_secret } from "../config/config.js";
 
 
+
 export const signup = async (req, resp) => {
   try {
     const { name, username, email, password } = req.body;
@@ -66,7 +67,7 @@ export const login = async (req, resp) => {
       secure: false,
       sameSite: "lax",
     });
-    resp.status(200).json({ message: "login successfull" , token : accessToken});
+    resp.status(200).json({ message: "login successfull" , token : accessToken, userid: res._id});
   } catch (error) {
     resp.status(500).json({ message: "login failed", error: error.message });
   }
