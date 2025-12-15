@@ -9,6 +9,7 @@ const Findfriends = () =>{
    const [user, setUser] = useState(null);
    const [loading, setLoading] = useState(false);
    const [error, setError] = useState("");
+   const me = localStorage.getItem("userid");
 
    const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,6 +33,28 @@ const Findfriends = () =>{
       setLoading(false);
     }
    };
+
+   const handleAddFriend = async() => {
+    try{
+      console.log(me);
+      console.log(user._id);
+    const res = await axios.post(`${baseurl}/api/friendship/addFriend`, {
+        user1: me,
+        user2: user._id // sending _id of user 2 which will reduce db queries
+    });
+   
+        alert(`Friend request sent to ${user.username || user}`);
+    
+    return {message: "Friend request sent successfully"};
+  }  catch(err){
+      if(err.status === 400 || err.response.status === 400){
+        alert("You have already sent a friend request to this user");
+      }else{
+        alert("Unable to send friend request");
+      }
+    } 
+
+  }
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
@@ -82,7 +105,7 @@ const Findfriends = () =>{
                 <p className="text-base font-medium">{user.username || user}</p>
               </div>
 
-              <button className="text-sm px-4 py-2 rounded-lg bg-white text-black hover:bg-gray-200 transition">
+              <button onClick={handleAddFriend} className="text-sm px-4 py-2 rounded-lg bg-white text-black hover:bg-gray-200 transition">
                 Add Friend
               </button>
             </div>
