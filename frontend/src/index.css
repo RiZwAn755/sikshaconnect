@@ -3,9 +3,12 @@
 @tailwind utilities;
 
 @keyframes fade {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.4;
   }
+
   50% {
     opacity: 1;
   }
