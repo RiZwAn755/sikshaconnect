@@ -1,3 +1,6 @@
+import { lazy, Suspense  } from "react";
+import gif from "/suspense.gif";
+
 const Landing = () => {
   
   return (
@@ -39,7 +42,7 @@ const Landing = () => {
           <div className="flex-1 w-full">
             <div className="w-full h-56 sm:h-72 rounded-xl bg-white text-black shadow-[0_4px_18px_rgba(0,0,0,0.10)] flex items-center justify-center">
               <span className="font-semibold text-gray-700 text-lg">
-               <img src="/logo.png" className="w-full h-56 sm:h-72 rounded-xl bg-white text-black -[0_4px_18px_rgba(0,0,0,0.10)] flex items-center justify-center"  />
+                <img src="/logo.png" loading="lazy" className="w-full h-56 sm:h-72 rounded-xl bg-white text-black shadow-[0_4px_18px_rgba(0,0,0,0.10)] flex items-center justify-center" />
               </span>
             </div>
           </div>

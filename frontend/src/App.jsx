@@ -1,43 +1,57 @@
-import Login from "./components/auth/login"
-import Register from "./components/auth/register"
-import Home from "./components/home/home"
-import ForgotPassword from "./components/auth/forgotpassword"
-import ResetPassword from "./components/auth/resetpassword"
-import {BrowserRouter as Router, Routes, Route} from "react-router-dom"
-import PayButton from "./components/payments/paybutton"
-import Nav from "./components/utils/navbar"
-import Footer from "./components/utils/footer"
-import PrivateComponent from "./components/auth/privatecomponent"
-import Landing from "./components/utils/landing"
-import NotFound from "./components/utils/404"
-import FriendList from "./components/friends/friendlist"
-import Profile from "./components/user/profile"
-import Logout from "./components/auth/logout"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { lazy } from "react";
+
+import Layout from "./components/layout/layout";
+import PrivateComponent from "./components/auth/privatecomponent";
+
+// Auth
+const Login = lazy(() => import("./components/auth/login"));
+const Register = lazy(() => import("./components/auth/register"));
+const ForgotPassword = lazy(() => import("./components/auth/forgotpassword"));
+const ResetPassword = lazy(() => import("./components/auth/resetpassword"));
+const Logout = lazy(() => import("./components/auth/logout"));
+
+// App pages
+const Home = lazy(() => import("./components/home/home"));
+const FriendList = lazy(() => import("./components/friends/friendlist"));
+const Profile = lazy(() => import("./components/user/profile"));
+const PayButton = lazy(() => import("./components/payments/paybutton"));
+
+// Utils
+const Landing = lazy(() => import("./components/utils/landing"));
+const NotFound = lazy(() => import("./components/utils/404"));
+
 
 function App() {
   return (
-      <Router>
-      <Nav />
+    <Router>
       <Routes>
-        <Route path = '/landing' element= {<Landing/>} />
-        <Route path='/login' element={<Login/>} />
-        <Route path='/signup' element={<Register/>} />
-        <Route path ="/forgot-pass" element ={<ForgotPassword/>}/>
-        <Route path ="/reset-password/:token" element ={<ResetPassword/>}/>
-        <Route path ="/*" element ={<NotFound/>}/>
+        {/* Layout + Suspense boundary */}
+        <Route element={<Layout />}>
+      
+          {/* Public routes */}
+          <Route path="/landing" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Register />} />
+          <Route path="/forgot-pass" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-       < Route element = {<PrivateComponent/>}>
-                <Route path='/paybutton' element={<PayButton amountvalue={25} />} />
-                 <Route path='/' element={<Home/>} />
-                 <Route path='/friends' element={<FriendList/>} />
-                 <Route path = '/profile' element = {<Profile/>} />
-                 <Route path="/logout" element = {<Logout/>} />
-       </Route>
+          {/* Protected routes */}
+          <Route element={<PrivateComponent />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/friends" element={<FriendList />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/paybutton" element={<PayButton amountvalue={25} />} />
+            <Route path="/logout" element={<Logout />} />
+          </Route>
 
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+
+        </Route>
       </Routes>
-      <Footer />
     </Router>
-  )
+  );
 }
 
 export default App;
