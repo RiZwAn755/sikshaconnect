@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/index.js",
+      "src": "backend/serverless.js",
       "use": "@vercel/node",
       "config": { "maxLambdaSize": "50mb" }
     }
@@ -10,8 +10,12 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/index.js"
+      "dest": "/backend/serverless.js"
     }
-  ]
- 
+  ],
+  "env": {
+    "MONGO_URI": "@MONGO_URI",
+    "REFRESH_SECRET": "@REFRESH_SECRET",
+    "ACCESS_SECRET": "@ACCESS_SECRET"
+  }
 }
