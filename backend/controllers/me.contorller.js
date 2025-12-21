@@ -32,16 +32,4 @@ export const search = async (req, resp) => {
     }
 }
 
-export const friendList = async (req, resp) => {
-    const { userid } = req.query;
-    try {
-        const user = await User.findOne({ _id: userid }).populate('friends', 'username name email');
-        if (!user) {
-            return resp.status(404).json({ message: 'User not found' });
-        }
-        return resp.status(200).json({ friends: user.friends });
-    } catch (err) {
-        console.error("Error fetching friend list:", err);
-        return resp.status(500).json({ message: 'Internal server error' });
-    }
-}   
+   
