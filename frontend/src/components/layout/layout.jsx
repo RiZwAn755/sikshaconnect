@@ -4,6 +4,7 @@ import gif from "/suspense.gif";
 import Nav from "../utils/navbar.jsx";
 import Footer from "../utils/footer.jsx";
 
+
 const Layout = () => {
   return (
     <>
@@ -12,6 +13,7 @@ const Layout = () => {
       <Outlet />
     </Suspense>
     <Footer/>
+    
     </>
   );
 };

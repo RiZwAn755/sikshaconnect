@@ -47,7 +47,7 @@ export const actionRequest = async (req, res) => {
         if (friendship.status !== "Requested") {
             return res.status(400).json({ message: "Request already processed" });
         }
-        // ACCEPT
+        
         if (action === "Accept") {
             await Friendship.updateOne(
                 { _id: friendship._id },
@@ -65,7 +65,7 @@ export const actionRequest = async (req, res) => {
             ]);
             return res.status(200).json({ message: "Friend request accepted" });
         }
-        // REJECT
+    
         await Friendship.updateOne(
             { _id: friendship._id },
             { status: "Rejected" }
@@ -75,4 +75,31 @@ export const actionRequest = async (req, res) => {
         console.error("Error processing friendship request:", err);
         return res.status(500).json({ message: "Internal server error" });
     }
+};
+
+export const getFriends = async (req, res) => {
+  try {
+    const { user1 } = req.query;
+    if (!user1) {
+      return res.status(400).json({ message: "userid is required" });
+    }
+
+    const friendships = await Friendship.find({
+      $or: [
+        { user1: user1 },
+        { user2: user1 }
+      ]
+    })
+
+    return res.status(200).json({
+      message: "Fetch successful",
+      friendships
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Unexpected error occurred"
+    });
+  }
 };

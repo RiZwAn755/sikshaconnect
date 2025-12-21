@@ -45,7 +45,7 @@ export const login = async (req, resp) => {
     const refreshToken = generateRefreshToken(res.username);
     res.refreshToken = refreshToken;
     await res.save();
-     // send tokens in cookies
+     
     resp.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: false,
