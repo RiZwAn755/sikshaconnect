@@ -41,8 +41,8 @@ export const login = async (req, resp) => {
     if (!isMatch) {
       return resp.status(401).json({ message: "invalid password" });
     }
-    const accessToken = generateAccessToken(res.username);
-    const refreshToken = generateRefreshToken(res.username);
+    const accessToken = generateAccessToken({username: res.username, id: res._id});
+    const refreshToken = generateRefreshToken({username: res.username, id: res._id});
     res.refreshToken = refreshToken;
     await res.save();
      

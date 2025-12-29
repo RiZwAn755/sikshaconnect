@@ -84,12 +84,14 @@ export const getFriends = async (req, res) => {
       return res.status(400).json({ message: "userid is required" });
     }
 
-    const friendships = await Friendship.find({
-      $or: [
-        { user1: user1 },
-        { user2: user1 }
-      ]
-    })
+        const friendships = await Friendship.find({
+            $or: [
+                { user1: user1 },
+                { user2: user1 }
+            ]
+        })
+            .populate('user1', 'name username')
+            .populate('user2', 'name username');
 
     return res.status(200).json({
       message: "Fetch successful",
