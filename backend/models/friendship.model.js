@@ -4,12 +4,12 @@ const friendshipSchema = new mongoose.Schema(
   {
     user1: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'users',
+      ref: 'User',
       required: true,
     },
     user2: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'users',
+      ref: 'User',
       required: true,
     },
     connectedAt: {

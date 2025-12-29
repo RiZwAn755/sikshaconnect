@@ -8,12 +8,10 @@ const baseurl = import.meta.env.VITE_BASE_URL;
 const userid = localStorage.getItem("userid");
 
 const fetchFriends = async () => {
-  const res = await axios.get(
-    `${baseurl}/api/friendship/friends`,
-    {
-      params: { user1: userid }
-    }
-  );
+  const res = await axios.get(`${baseurl}/api/friendship/friends`, {
+    params: { user1: userid },
+    withCredentials: true,
+  });
 
   return res.data.friendships;
 };
@@ -22,7 +20,7 @@ const FriendList = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { isLoading, error } = useQuery({
+  const { isLoading, error, data } = useQuery({
     queryKey: ["friendlist", userid],
     queryFn: fetchFriends,
     enabled: !!userid,
@@ -74,10 +72,32 @@ const FriendList = () => {
         {/* Find Friends */}
         <FindFriends />
 
-        {/* Empty State Placeholder */}
-        <div className="text-center text-gray-500 text-sm">
-          Select a tab above to manage your connections
-        </div>
+        {/* Friend List */}
+        {(!data || data.length === 0) && (
+          <div className="text-center text-gray-500 text-sm">No connections yet</div>
+        )}
+
+        {data && data.length > 0 && (
+          <ul className="space-y-4">
+            {data.map((f) => {
+              const u1 = f.user1 && f.user1._id ? f.user1 : f.user1;
+              const u2 = f.user2 && f.user2._id ? f.user2 : f.user2;
+              const other = u1._id === userid ? u2 : u1;
+              return (
+                <li key={f._id} className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-sm text-gray-600">{(other.name || other.username || '').charAt(0)}</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">{other.name || other.username}</div>
+                    <div className="text-sm text-gray-500">@{other.username}</div>
+                  </div>
+                  <div className="ml-auto text-sm text-gray-600">{f.status}</div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
     </div>

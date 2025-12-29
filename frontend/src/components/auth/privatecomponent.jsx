@@ -22,7 +22,7 @@ const PrivateComponent = () => {
 
     useEffect(() => {
         if (!valid && !alertShown) {
-            // show message once, then redirect
+            
             alert("login karo pahle");
             setAlertShown(true);
             setShouldRedirect(true);

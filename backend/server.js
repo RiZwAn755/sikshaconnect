@@ -9,7 +9,12 @@ import cors from "cors";
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+
+const corsOptions = {
+	origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
+	credentials: true,
+};
+app.use(cors(corsOptions));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/payment", paymentRoutes);
