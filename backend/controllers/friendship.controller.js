@@ -1,4 +1,5 @@
 import Friendship from "../models/friendship.model.js";
+import User from "../models/user.model.js";
 // here u1 and u2 are ids of users sent by frontend
 export const addFriend = async (req, res) => {
     try {
@@ -12,6 +13,10 @@ export const addFriend = async (req, res) => {
             user2: u2,
             status: "Requested"
         });
+
+        if(u1==u2){
+            return res.status(400).json({ message: "You cannot send friend request to yourself" });
+        }
         return res.status(201).json({
             message: "Friend request sent",
             friendship
@@ -65,11 +70,11 @@ export const actionRequest = async (req, res) => {
             ]);
             return res.status(200).json({ message: "Friend request accepted" });
         }
-    
-        await Friendship.updateOne(
-            { _id: friendship._id },
-            { status: "Rejected" }
-        );
+        //  await Friendship.updateOne(
+        //     { _id: friendship._id },
+        //     { status: "Rejected" }
+        // );
+         await Friendship.deleteOne({ _id: friendship._id });
         return res.status(200).json({ message: "Friend request rejected" });
     } catch (err) {
         console.error("Error processing friendship request:", err);

@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema({
   refreshToken: {
     type: String
   },
+  friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: []
+  }],
 
 });
 

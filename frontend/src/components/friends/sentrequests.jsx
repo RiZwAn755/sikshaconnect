@@ -27,7 +27,7 @@ const Friendrequests = () => {
   if (isLoading) return <Loader />;
   if (error) return <h3 className="text-red-500">Something went wrong 😕</h3>;
 
-  const requests = data?.filter(f => f.status === "Requested");
+  const requests = data?.filter(f => f.status === "Requested" && f.user1._id === userid);
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -62,8 +62,7 @@ const Friendrequests = () => {
               </tr>
             ) : (
               requests.map((f) => {
-                const friend =
-                  f.user1._id === userid ? f.user2 : f.user1;
+                const friend = f.user2; // recipient
 
                 return (
                   <tr
