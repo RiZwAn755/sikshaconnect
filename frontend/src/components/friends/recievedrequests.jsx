@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Loader from "../utils/loader.jsx";
 
 const baseurl = import.meta.env.VITE_BASE_URL;
@@ -17,6 +17,7 @@ const fetchRequests = async () => {
 };
 
 const Friendrequests = () => {
+  const queryClient = useQueryClient();
   const { isLoading, error, data } = useQuery({
     queryKey: ["friendreqs", userid],
     queryFn: fetchRequests,
@@ -27,7 +28,22 @@ const Friendrequests = () => {
   if (isLoading) return <Loader />;
   if (error) return <h3 className="text-red-500">Something went wrong 😕</h3>;
 
-  const requests = data?.filter(f => f.status === "Pending");
+  const requests = data?.filter(f => f.status === "Requested" && f.user2._id === userid);
+
+  const handleAction = async (user1, user2, action) => {
+    try {
+      await axios.put(`${baseurl}/api/friendship/actionRequest`, {
+        user1,
+        user2,
+        action
+      });
+      queryClient.invalidateQueries(["friendreqs", userid]);
+      queryClient.invalidateQueries(["friendlist", userid]);
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Action failed");
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -44,7 +60,7 @@ const Friendrequests = () => {
                 Username
               </th>
               <th className="text-right px-6 py-4 text-white text-sm uppercase tracking-wider">
-                Status
+                Action
               </th>
             </tr>
           </thead>
@@ -61,8 +77,7 @@ const Friendrequests = () => {
               </tr>
             ) : (
               requests.map((f) => {
-                const friend =
-                  f.user1._id === userid ? f.user2 : f.user1;
+                const friend = f.user1; // sender
 
                 return (
                   <tr
@@ -70,13 +85,22 @@ const Friendrequests = () => {
                     className="border-b hover:bg-gray-50 transition"
                   >
                     <td className="px-6 py-4 text-black font-medium">
-                      {friend.username|| "-"}
+                      {friend.username || "-"}
                     </td>
 
-                    <td className="px-6 py-4 text-right">
-                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-600">
-                        Requested
-                      </span>
+                    <td className="px-6 py-4 text-right space-x-2">
+                      <button
+                        onClick={() => handleAction(friend._id, userid, "Accept")}
+                        className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleAction(friend._id, userid, "Reject")}
+                        className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                      >
+                        Reject
+                      </button>
                     </td>
                   </tr>
                 );

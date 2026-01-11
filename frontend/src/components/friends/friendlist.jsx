@@ -73,13 +73,17 @@ const FriendList = () => {
         <FindFriends />
 
         {/* Friend List */}
-        {(!data || data.length === 0) && (
-          <div className="text-center text-gray-500 text-sm">No connections yet</div>
-        )}
+        {(() => {
+          const friends = data?.filter(f => f.status === "Accepted");
+          return (
+            <>
+              {(!friends || friends.length === 0) && (
+                <div className="text-center text-gray-500 text-sm">No connections yet</div>
+              )}
 
-        {data && data.length > 0 && (
-          <ul className="space-y-4">
-            {data.map((f) => {
+              {friends && friends.length > 0 && (
+                <ul className="space-y-4">
+                  {friends.map((f) => {
               const u1 = f.user1 && f.user1._id ? f.user1 : f.user1;
               const u2 = f.user2 && f.user2._id ? f.user2 : f.user2;
               const other = u1._id === userid ? u2 : u1;
@@ -92,12 +96,14 @@ const FriendList = () => {
                     <div className="font-medium text-black">{other.name || other.username}</div>
                     <div className="text-sm text-gray-500">@{other.username}</div>
                   </div>
-                  <div className="ml-auto text-sm text-gray-600">{f.status}</div>
                 </li>
               );
-            })}
-          </ul>
-        )}
+                  })}
+                </ul>
+              )}
+            </>
+          );
+        })()}
       </div>
 
     </div>
