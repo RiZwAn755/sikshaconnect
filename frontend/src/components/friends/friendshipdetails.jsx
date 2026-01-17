@@ -44,7 +44,7 @@ const FriendshipDetails = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
 
-      {/* Page Header */}
+      
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate(-1)}
@@ -57,10 +57,10 @@ const FriendshipDetails = () => {
         </h1>
       </div>
 
-      {/* Content Card */}
+      
       <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-6 space-y-6">
 
-        {/* Friend Info */}
+       
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center">
             <span className="text-lg font-medium text-gray-600">
@@ -78,7 +78,7 @@ const FriendshipDetails = () => {
           </div>
         </div>
 
-        {/* Friendship Meta */}
+       
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
           <div>
@@ -114,7 +114,7 @@ const FriendshipDetails = () => {
           </div>
         </div>
 
-        {/* Current Task */}
+        
         <div className="border-t pt-4">
           <p className="text-sm text-gray-500 mb-1">Current Task</p>
           <p className="font-medium text-black">
@@ -124,7 +124,7 @@ const FriendshipDetails = () => {
           </p>
         </div>
 
-        {/* Actions */}
+        
         <div className="flex gap-3 pt-4 border-t">
           <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
             Message

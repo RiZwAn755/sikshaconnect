@@ -98,7 +98,7 @@ const FriendList = () => {
                   </div>
                   <button 
                     onClick={() => navigate(`/friendship/${f._id}`)}
-                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition text-sm"
+                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition text-sm alignment-center ml-auto"
                   >
                     View Details
                   </button>

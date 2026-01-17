@@ -56,7 +56,7 @@ export const actionRequest = async (req, res) => {
         if (action === "Accept") {
             await Friendship.updateOne(
                 { _id: friendship._id },
-                { status: "Accepted" }
+                { status: "Accepted", connectedAt: new Date() }
             );
             await Promise.all([
                 User.updateOne(
