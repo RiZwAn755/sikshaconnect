@@ -110,3 +110,27 @@ export const getFriends = async (req, res) => {
     });
   }
 };
+
+
+export const getFriendshipDetails = async (req, res)=>{
+     try{
+        const {friendshipId} = req.params;
+        if(!friendshipId){
+            return res.status(400).json({message: "friendshipId is required"});
+        }
+        const friendship = await Friendship.findById(friendshipId)
+        .populate('user1', 'name username email')
+        .populate('user2', 'name username email')
+        // .populate('currentTask');
+
+        if(!friendship){
+            return res.status(404).json({message: "Friendship not found"});
+        }
+        return res.status(200).json({message: "Fetch successful", friendship});
+
+     }
+     catch(err){
+        console.error(err);
+        return res.status(500).json({message: "Unexpected error occurred"});
+     }
+}
