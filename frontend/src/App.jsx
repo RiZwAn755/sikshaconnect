@@ -19,6 +19,7 @@ const Landing = lazy(() => import("./components/utils/landing"));
 const NotFound = lazy(() => import("./components/utils/404"));
 const PendingRequests = lazy(() => import("./components/friends/recievedrequests"));
 const Friendrequests = lazy(() => import("./components/friends/sentrequests"));
+const FriendshipDetails = lazy(() => import("./components/friends/friendshipdetails"));
 
 
 
@@ -46,6 +47,7 @@ function App() {
             <Route path="/pendingrequests" element={<PendingRequests />} />
             <Route path="/friendrequests" element={<Friendrequests />} />
             <Route path="/friendlist" element={<FriendList />} />
+            <Route path="/friendship/:friendshipId" element={<FriendshipDetails />} />
 
           </Route>
 
