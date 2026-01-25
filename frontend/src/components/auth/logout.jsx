@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
+
 
 const baseurl = import.meta.env.VITE_BASE_URL;
 const Logout = () => {
@@ -8,13 +8,17 @@ const Logout = () => {
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    const res = await axios.get(`${baseurl}/api/auth/logout`)
-    if (res) {
-      Cookies.remove('token');
-      localStorage.removeItem('userid');
-      navigate('/landing');
-    } else {
-      return { "message": "unable to logout" };
+    try {
+      const res = await axios.get(`${baseurl}/api/auth/logout`, {
+        withCredentials: true,
+      });
+      if (res.status === 200) {
+        localStorage.removeItem('userid');
+        navigate('/landing');
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("Logout failed");
     }
   }
 

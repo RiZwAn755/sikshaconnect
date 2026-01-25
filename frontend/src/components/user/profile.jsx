@@ -53,11 +53,11 @@ const Profile = () => {
                 <div className="bg-black text-white rounded-lg p-6 sm:p-10">
                     <div className="flex flex-col sm:flex-row items-center gap-6">
                         <div className="w-32 h-32 rounded-full bg-white flex items-center justify-center text-black text-xl font-semibold">
-                            {user?.name ? user.name.charAt(0).toUpperCase() : (username ? username.charAt(0).toUpperCase() : "U")}
+                            {user?.name ? user.name.charAt(0).toUpperCase() : (user?.username ? user.username.charAt(0).toUpperCase() : "U")}
                         </div>
                         <div className="flex-1">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-red-500">{user?.name || username}</h1>
-                            <p className="mt-2 text-sm">@{user?.username || username}</p>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-red-500">{user?.name || user?.username}</h1>
+                            <p className="mt-2 text-sm">@{user?.username}</p>
                             {user?.email && <p className="mt-1 text-sm">{user.email}</p>}
                             <div className="mt-3 flex flex-wrap gap-3">
                                 <Logout />

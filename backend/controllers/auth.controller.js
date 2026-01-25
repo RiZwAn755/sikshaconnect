@@ -24,7 +24,7 @@ export const signup = async (req, resp) => {
     });
 
     await user.save();
-    resp.status(201).send("user registered succesfully");
+    return resp.status(201).send("user registered succesfully");
   } catch (error) {
     resp.status(500).send("error creating user");
   }
@@ -35,14 +35,21 @@ export const login = async (req, resp) => {
     const { username, password } = req.body;
     const res = await User.findOne({ username });
     if (!res) {
-      resp.status(401).send("user not found");
+      return resp.status(401).json({ message: "user not found" });
     }
     const isMatch = await bcrypt.compare(password, res.password);
     if (!isMatch) {
       return resp.status(401).json({ message: "invalid password" });
     }
-    const accessToken = generateAccessToken({user: res});
-    const refreshToken = generateRefreshToken({user: res});
+    // Only include essential fields in token to avoid header overflow
+    const userPayload = {
+      _id: res._id,
+      username: res.username,
+      email: res.email,
+      name: res.name
+    };
+    const accessToken = generateAccessToken(userPayload);
+    const refreshToken = generateRefreshToken(userPayload);
     res.refreshToken = refreshToken;
     await res.save();
      
@@ -56,7 +63,7 @@ export const login = async (req, resp) => {
       secure: false,
       sameSite: "lax",
     });
-    resp.status(200).json({ message: "login successfull", token: accessToken, userid: res._id });
+    resp.status(200).json({ message: "login successfull", userid: res._id });
   } catch (error) {
     resp.status(500).json({ message: "login failed", error: error.message });
   }
@@ -71,8 +78,16 @@ export const logout = async (req, resp) => {
       await user.save();
     }
   }
-  resp.clearCookie("token");
-  resp.clearCookie("refreshToken");
+  resp.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+  resp.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
 
   resp.json({ message: "logged out successfully" });
 };
@@ -136,7 +151,8 @@ export const refresh = async (req, resp) => {
     if (!user) {
       return resp.status(401).json({ message: "invalid refresh token" });
     }
-    const newAccessToken = generateAccessToken({ user });
+
+    const newAccessToken = generateAccessToken(user.toObject());
     resp.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: false,
