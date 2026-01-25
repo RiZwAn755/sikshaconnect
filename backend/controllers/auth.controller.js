@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import SendEmail from "../utils/sendemail.js";
 import { generateAccessToken, generateRefreshToken, generateResetToken } from "../utils/generatetokens.js";
-import { reset_token_secret } from "../config/config.js";
+import { reset_token_secret, refresh_token_secret} from "../config/config.js";
 
 export const signup = async (req, resp) => {
   try {
@@ -41,8 +41,8 @@ export const login = async (req, resp) => {
     if (!isMatch) {
       return resp.status(401).json({ message: "invalid password" });
     }
-    const accessToken = generateAccessToken({username: res.username, id: res._id});
-    const refreshToken = generateRefreshToken({username: res.username, id: res._id});
+    const accessToken = generateAccessToken({user: res});
+    const refreshToken = generateRefreshToken({user: res});
     res.refreshToken = refreshToken;
     await res.save();
      
@@ -122,4 +122,28 @@ export const resetPassword = async (req, resp) => {
     resp.status(400).json({ message: "token expired or invalid" });
   }
 
+}
+
+
+export const refresh = async (req, resp) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return resp.status(401).json({ message: "no refresh token provided" });
+  }
+  try {
+    const decoded = jwt.verify(refreshToken, refresh_token_secret);
+    const user = await User.findById(decoded._id);
+    if (!user) {
+      return resp.status(401).json({ message: "invalid refresh token" });
+    }
+    const newAccessToken = generateAccessToken({ user });
+    resp.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+    resp.json({ message: "access token refreshed", accessToken: newAccessToken });
+  } catch (err) {
+    resp.status(401).json({ message: "invalid refresh token" });
+  }
 }
