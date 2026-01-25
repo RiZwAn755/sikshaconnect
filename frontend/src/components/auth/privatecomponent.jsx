@@ -1,20 +1,29 @@
 import { Navigate, Outlet } from "react-router-dom";
-import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
 
-const isTokenValid = (accessToken) => {
+
+const isTokenValid = (accessToken, refreshToken) => {
     if (!accessToken || accessToken === "undefined") return false;
     try {
         const payload = accessToken.split(".")[1];
         const decoded = JSON.parse(atob(payload));
         const expMs = (decoded.exp || 0) * 1000;
-        return expMs > Date.now();
+        
+          const res = false;
+         jwt.verify(refreshToken , refresh_token_secret, async(err , decoded)=>{
+            if(err)res = false;
+            else res = true;
+        });
+
+        if ( expMs > Date.now() ||  expMs < Date.now() && res) {
+            return true;
+        }
     } catch (e) {
         return false;
     }
 };
 
 const PrivateComponent = () => {
+    
     const accessToken = Cookies.get("token");
     const valid = isTokenValid(accessToken);
     const [shouldRedirect, setShouldRedirect] = useState(false);
