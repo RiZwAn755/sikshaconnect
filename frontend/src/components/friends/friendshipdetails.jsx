@@ -2,44 +2,63 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Loader from "../utils/loader.jsx";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
 const baseurl = import.meta.env.VITE_BASE_URL;
 const userid = localStorage.getItem("userid");
 
+const fetchFriendshipDetails = async (friendshipId) => {
+  const res = await axios.get(
+    `${baseurl}/api/friendship/${friendshipId}`,
+    { withCredentials: true }
+  );
+  return res.data.friendship;
+};
+
+
 const FriendshipDetails = () => {
   const { friendshipId } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const [friendship, setFriendship] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { isLoading, error, data: friendship } = useQuery({
+    queryKey: ["friendshipDetails", friendshipId],
+    queryFn: () => fetchFriendshipDetails(friendshipId),
+    enabled: !!friendshipId,
+    staleTime: 10000,
+  });
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      try {
-        const res = await axios.get(
-          `${baseurl}/api/friendship/${friendshipId}`,
-          { withCredentials: true }
-        );
-        setFriendship(res.data.friendship);
-      } catch (error) {
-        console.error("Error fetching friendship details:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  
 
-    if (friendshipId) {
-      fetchDetails();
-    }
-  }, [friendshipId]);
+     const removeMutateFriend = useMutation({
+    mutationFn: async () => {
+              await axios.delete(`${baseurl}/api/friendship/${friendshipId}`, {
+              data: { user1: u1._id, user2: u2._id },
+             withCredentials: true,
+      });
+    },
+    onSuccess: async () => {
+              alert(`You have removed ${friend.username || friend.name} from your friends list.`);
+              await queryClient.invalidateQueries({ queryKey: ["friendlist"] });
+              navigate("/friendlist");
+    },
+    onError: (err) => {
+              console.error("Error removing friend:", err);
+              alert("Unable to remove friend");
+    },
 
-  if (loading) return <Loader />;
-  if (!friendship)
-    return <p className="text-center text-gray-500">Friendship not found</p>;
+  });
+
+
+  if (isLoading) return <Loader />;
+  if (error) return <h3 className="text-red-500">Something went wrong</h3>;
 
   const u1 = friendship.user1;
   const u2 = friendship.user2;
   const friend = u1._id === userid ? u2 : u1;
+
+
+
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
@@ -107,8 +126,8 @@ const FriendshipDetails = () => {
           <div>
             <p className="text-sm text-gray-500">Last Streak Update</p>
             <p className="font-medium text-black">
-              {friendship.streak?.lastUpdated
-                ? new Date(friendship.streak.lastUpdated).toLocaleDateString()
+              {friendship.streak?.updatedAt
+                ? new Date(friendship.streak.updatedAt).toLocaleDateString()
                 : "—"}
             </p>
           </div>
@@ -130,7 +149,7 @@ const FriendshipDetails = () => {
             Message
           </button>
 
-          <button className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
+          <button onClick={()=> removeMutateFriend.mutate()} className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
             Remove Friend
           </button>
         </div>

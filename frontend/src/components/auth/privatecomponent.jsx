@@ -14,11 +14,11 @@ export default function PrivateComponent() {
       .then(() => setIsAuthorized(true))
       .catch(() => {
         setIsAuthorized(false);
-        navigate("/login");
+        navigate("/landing");
       });
   }, []);
 
-  if (isAuthorized === null) return null;
+  if (isAuthorized === null)  return null;
 
-  return isAuthorized ? <Outlet /> : null;
+  return isAuthorized ? <Outlet /> : alert("login karo pahle");
 }

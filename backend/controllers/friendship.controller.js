@@ -134,3 +134,38 @@ export const getFriendshipDetails = async (req, res)=>{
         return res.status(500).json({message: "Unexpected error occurred"});
      }
 }
+
+
+export const removeFriend = async (req, res) => {
+    try{
+        const { user1: u1, user2: u2 } = req.body;
+
+        if(!u1 || !u2){
+            return res.status(400).json({message: "Both user IDs are required"});
+        }
+        const friendship = await Friendship.findOneAndDelete({
+            $or: [
+                { user1: u1, user2: u2 },
+                { user1: u2, user2: u1 }
+            ]
+        });
+        if(!friendship){
+            return res.status(404).json({message: "Friendship not found"});
+        }
+        await Promise.all([
+            User.updateOne(
+                { _id: u1 },
+                { $pull: { friends: u2 } }
+            ),
+            User.updateOne(
+                { _id: u2 },
+                { $pull: { friends: u1 } }
+            )
+        ]);
+        return res.status(200).json({message: "Friend removed successfully"});
+    }
+    catch(err){
+        console.error(err);
+        return res.status(500).json({message: "Internal server error"});
+    }
+}
