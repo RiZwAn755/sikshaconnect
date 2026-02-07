@@ -1,65 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import debounce from "lodash.debounce";
 
 const baseurl = import.meta.env.VITE_BASE_URL;
 
 const Findfriends = () => {
-
   const [username, setUsername] = useState("");
-  const [user, setUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
   const me = localStorage.getItem("userid");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!username) {
-      setError("Please enter a username");
+  const fetchUsers = async (value) => {
+    if (!value || value.length < 1) {
+      setUsers([]);
       return;
     }
-    setLoading(true);
-    setError("");
-    setUser(null);
+
     try {
-      const result = await axios.post(`${baseurl}/api/user/search`, { username });
-      const data = result?.data;
-      if (data?.user) setUser(data.user);
-      else if (data?.username) setUser(data);
-      else setError("User not found");
+      setLoading(true);
+      const res = await axios.post(`${baseurl}/api/user/search`, {
+        username: value,
+      });
+      setUsers(res.data.users || []);
     } catch (err) {
-      console.error(err);
-      setError("User not found");
+      setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddFriend = async () => {
+ 
+  const debouncedSearch = debounce(fetchUsers, 1000);
+
+  useEffect(() => {
+    debouncedSearch(username);
+    return () => debouncedSearch.cancel();
+  }, [username]);
+
+  const handleAddFriend = async (userId, uname) => {
     try {
-      console.log(me);
-      console.log(user._id);
-      const res = await axios.post(`${baseurl}/api/friendship/addFriend`, {
+      await axios.post(`${baseurl}/api/friendship/addFriend`, {
         user1: me,
-        user2: user._id // sending _id of user 2 which will reduce db queries
+        user2: userId,
       });
 
-      alert(`Friend request sent to ${user.username || user}`);
-
-      return { message: "Friend request sent successfully" };
+      alert(`Friend request sent to ${uname}`);
     } catch (err) {
-      if (err.status === 400 || err.response.status === 400) {
-        alert("You have already sent a friend request to this user");
-      } else {
-        alert("Unable to send friend request");
-      }
+      alert("Request already sent or error occurred");
     }
-
-  }
+  };
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
       <div className="w-full max-w-xl bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl">
-
         <h1 className="text-2xl sm:text-3xl font-semibold tracking-wide text-center">
           Find <span className="text-red-500">Friends</span>
         </h1>
@@ -67,9 +61,10 @@ const Findfriends = () => {
           Search users by username
         </p>
 
-
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
           className="mt-8 flex flex-col sm:flex-row gap-4"
         >
           <input
@@ -88,26 +83,26 @@ const Findfriends = () => {
           </button>
         </form>
 
-
-        <div className="mt-10">
-          <h3 className="text-lg font-medium mb-4 border-b border-white/10 pb-2">Results</h3>
-
+        <div className="mt-6">
           {loading && <p className="text-gray-400 text-sm">Searching...</p>}
 
-          {!loading && error && (
-            <p className="text-gray-400 text-sm">{error}</p>
-          )}
+          {users.length > 0 && (
+            <div className="space-y-3">
+              {users.map((u) => (
+                <div
+                  key={u._id}
+                  className="flex items-center justify-between bg-black/40 border border-white/10 rounded-xl p-4"
+                >
+                  <p className="text-sm font-medium">{u.username}</p>
 
-          {user && (
-            <div className="flex items-center justify-between bg-black/40 border border-white/10 rounded-xl p-4">
-              <div>
-                <p className="text-sm text-gray-400">Username</p>
-                <p className="text-base font-medium">{user.username || user}</p>
-              </div>
-
-              <button onClick={handleAddFriend} className="text-sm px-4 py-2 rounded-lg bg-white text-black hover:bg-gray-200 transition">
-                Add Friend
-              </button>
+                  <button
+                    onClick={() => handleAddFriend(u._id, u.username)}
+                    className="text-sm px-4 py-2 rounded-lg bg-white text-black hover:bg-gray-200 transition"
+                  >
+                    Add Friend
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>

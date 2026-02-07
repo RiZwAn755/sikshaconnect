@@ -1,23 +1,19 @@
 import jwt from 'jsonwebtoken';
-const access_token_secret = process.env.ACCESS_TOKEN_SECRET||"jhcgkhcxxgxkfg";
+import { access_token_secret } from '../config/config.js';
 
-export const authMiddleware = async(req, resp, next)=>{
-   try{
-      const accessToken = req.cookies.accessToken;
-      
-      if(!accessToken){
-         return resp.status(401).json({message:"no access token provider"})
-      }
+export const authMiddleware = (req, res, next) => {
+  const accessToken = req.cookies.accessToken;
 
-      jwt.verify(accessToken, access_token_secret, async(err,decoded)=>{
-         if(!err){
-            req.user = decoded;
-            return next();
-         }
-      })
-   } catch(err){
-     resp.status(500).json({ message: "Middleware error", error: error.message });
-   }
-    
-   
-}
+  if (!accessToken) {
+    return res.status(401).json({ message: "No access token provided" });
+  }
+
+  jwt.verify(accessToken, access_token_secret, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: "Invalid or expired access token" });
+    }
+
+    req.user = decoded;
+    next();
+  });
+};

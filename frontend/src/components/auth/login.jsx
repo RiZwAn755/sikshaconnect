@@ -16,23 +16,19 @@ const Login = () => {
       return;
     }
     try {
-      const res = await axios.post(`${baseurl}/api/auth/login`, {
-        username,
-        password,
-      });
-      if (res?.data?.token) {
-        Cookies.set("token", res.data.token);
-        localStorage.setItem("userid", res.data.userid);
-
-        navigate("/");
-      } else {
-        alert("Login failed");
-      }
-    } catch (err) {
-      console.log(err);
-      alert("Login error");
-    }
-  };
+    const res = await axios.post(
+  `${baseurl}/api/auth/login`,
+  { username, password },
+  { withCredentials: true }
+);
+    localStorage.setItem("userid", res.data.userid);
+    if (res.status === 200) navigate("/");
+    
+  }
+  catch (error) {
+    alert("Login failed ");
+  }
+};
 
   return (
     <main className="min-h-screen bg-white flex items-center justify-center px-4">
