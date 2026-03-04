@@ -20,19 +20,11 @@ const friendshipSchema = new mongoose.Schema(
       enum: ['Accepted', 'Requested', 'Rejected'],
       required: true,
     },
-    streak: {
-      count: {
-        type: Number,
-        default: 0,
-      },
-      lastUpdated: {
-        type: Date,
-      },
-    },
+    
     currentTask: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'tasks',
-      default: null,
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'Task',
+      default: [],
     },
   },
   { timestamps: true }
