@@ -11,9 +11,15 @@ const TaskSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
+
+    description:{
+        type:String,
+    },
+
     duration:{
         type:Number
     },
+    
     status:{
         type:String,
         enum:['waiting_for_payment', 'in_progress', 'completed', 'expired'],
@@ -23,10 +29,15 @@ const TaskSchema = new mongoose.Schema({
     startedAT: Date,
     endsAt:Date,
 
-     userPayments: {
+    userPayments: {
     user1Paid: { type: Boolean, default: false },
     user2Paid: { type: Boolean, default: false }
   },
+
+  streak: {
+    count: {
+      type: Number, 
+    }  }
 
 }, {timestamps:true})
 

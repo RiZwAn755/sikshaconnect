@@ -16,10 +16,14 @@ const fetchFriends = async () => {
   return res.data.friendships;
 };
 
+
+
 const FriendList = () => {
+
   const navigate = useNavigate();
   const location = useLocation();
 
+    
   const { isLoading, error, data } = useQuery({
     queryKey: ["friendlist", userid],
     queryFn: fetchFriends,
@@ -101,6 +105,12 @@ const FriendList = () => {
                     className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition text-sm alignment-center ml-auto"
                   >
                     View Details
+                  </button>
+                   <button 
+                    onClick={() => navigate('/taskForm')}
+                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition text-sm alignment-center ml-auto"
+                  >
+                    start a task
                   </button>
                 </li>
               );
