@@ -107,7 +107,7 @@ const FriendList = () => {
                     View Details
                   </button>
                    <button 
-                    onClick={() => navigate('/taskForm')}
+                    onClick={() => navigate(`/taskForm/${f._id}`)}
                     className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition text-sm alignment-center ml-auto"
                   >
                     start a task
