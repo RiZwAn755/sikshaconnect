@@ -54,7 +54,7 @@ const FriendshipDetails = () => {
   if (error) return <h3 className="text-red-500">Something went wrong</h3>;
 
   const u1 = friendship.user1;
-  const u2 = friendship.user2;
+  const u2 = Array.isArray(friendship.user2) ? friendship.user2[0] : friendship.user2;
   const friend = u1._id === userid ? u2 : u1;
 
 

@@ -21,6 +21,7 @@ const PendingRequests = lazy(() => import("./components/friends/recievedrequests
 const Friendrequests = lazy(() => import("./components/friends/sentrequests"));
 const FriendshipDetails = lazy(() => import("./components/friends/friendshipdetails"));
 const Taskform = lazy(() => import("./tasks/taskform"));
+const MyTasks = lazy(() => import("./tasks/mytasks"));
 
 
 
@@ -50,6 +51,7 @@ function App() {
             <Route path="/friendlist" element={<FriendList />} />
             <Route path="/friendship/:friendshipId" element={<FriendshipDetails />} />
             <Route path="/taskform/:friendshipId" element={<Taskform />} />
+            <Route path="/mytasks" element={<MyTasks />} />
 
           </Route>
 

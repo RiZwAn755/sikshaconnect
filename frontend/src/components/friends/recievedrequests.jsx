@@ -28,7 +28,10 @@ const Friendrequests = () => {
   if (isLoading) return <Loader />;
   if (error) return <h3 className="text-red-500">Something went wrong 😕</h3>;
 
-  const requests = data?.filter(f => f.status === "Requested" && f.user2._id === userid);
+  const requests = data?.filter(f => {
+    const isUser2 = Array.isArray(f.user2) ? f.user2.some(u => u._id === userid) : f.user2._id === userid;
+    return f.status === "Requested" && isUser2;
+  });
 
   const handleAction = async (user1, user2, action) => {
     try {

@@ -89,7 +89,8 @@ const FriendList = () => {
                 <ul className="space-y-4">
                   {friends.map((f) => {
               const u1 = f.user1 && f.user1._id ? f.user1 : f.user1;
-              const u2 = f.user2 && f.user2._id ? f.user2 : f.user2;
+              const u2Raw = f.user2 && f.user2._id ? f.user2 : f.user2;
+              const u2 = Array.isArray(u2Raw) ? u2Raw[0] : u2Raw;
               const other = u1._id === userid ? u2 : u1;
               return (
                 <li key={f._id} className="flex items-center gap-4">

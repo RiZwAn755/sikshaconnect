@@ -62,7 +62,8 @@ const Friendrequests = () => {
               </tr>
             ) : (
               requests.map((f) => {
-                const friend = f.user2; // recipient
+                // Handle the case where user2 is an array
+                const friend = Array.isArray(f.user2) ? f.user2[0] : f.user2;
 
                 return (
                   <tr
@@ -70,7 +71,7 @@ const Friendrequests = () => {
                     className="border-b hover:bg-gray-50 transition"
                   >
                     <td className="px-6 py-4 text-black font-medium">
-                      {friend.username|| "-"}
+                      {(friend && friend.username) || "-"}
                     </td>
 
                     <td className="px-6 py-4 text-right">

@@ -8,9 +8,10 @@ const friendshipSchema = new mongoose.Schema(
       required: true,
     },
     user2: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: [mongoose.Schema.Types.ObjectId],
       ref: 'User',
       required: true,
+      default: []
     },
     connectedAt: {
       type: Date,

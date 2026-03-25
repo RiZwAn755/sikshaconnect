@@ -2,13 +2,14 @@ import axios from "axios";
 const baseUrl = import.meta.env.VITE_BASE_URL;
 const key = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
-function PayButton({ amountvalue = 25 }) {
+function PayButton({ amountvalue = 25, taskId }) {
   const amountNumeric = Number(amountvalue);
 
   const payNow = async () => {
     const { data: order } = await axios.post(
       `${baseUrl}/api/payment/create-order`,
-      { amount: amountNumeric }
+      { amount: amountNumeric },
+      { withCredentials: true }
     );
 
     const options = {
@@ -21,10 +22,18 @@ function PayButton({ amountvalue = 25 }) {
       handler: async function (response) {
         const verifyRes = await axios.post(
           `${baseUrl}/api/payment/verify`,
-          response
+          response,
+          { withCredentials: true }
         );
 
         if (verifyRes.data.success) {
+          if (taskId) {
+             try {
+                await axios.put(`${baseUrl}/api/task/pay/${taskId}`, {}, { withCredentials: true });
+             } catch (err) {
+                console.error("Failed to mark task as paid", err);
+             }
+          }
           alert("Payment Successful!");
         } else {
           alert("Payment Failed!");

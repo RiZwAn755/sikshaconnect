@@ -1,9 +1,13 @@
 import React from "react";
+import PendingTasks from "../../tasks/pendingtasks.jsx";
 
 const Home = () => {
   return (
     <main className="min-h-screen bg-white px-4 py-8">
       <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Pending Tasks Banner */}
+        <PendingTasks />
 
         {/* Welcome + Primary Action */}
         <section className="bg-white border border-gray-200 rounded-2xl p-8 

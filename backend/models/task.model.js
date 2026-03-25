@@ -1,45 +1,62 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const TaskSchema = new mongoose.Schema({
-
-    friendshipId:{
-        type: mongoose.Types.ObjectId,
-        ref : 'Friendship',
-        required:true,
+    // Changed from friendshipId to an array of participants
+    participants: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    }],
+    
+    // Who created the task (optional but helpful)
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
     },
-    title:{
-        type:String,
-        required:true,
+
+    title: {
+        type: String,
+        required: true,
     },
 
-    description:{
-        type:String,
+    description: {
+        type: String,
     },
 
-    duration:{
-        type:Number
+    duration: {
+        type: Number
     },
     
-    status:{
-        type:String,
-        enum:['waiting_for_payment', 'in_progress', 'completed', 'expired'],
-        default:'waiting_for_payment'
+    status: {
+        type: String,
+        enum: ['waiting_for_payment', 'in_progress', 'completed', 'expired'],
+        default: 'waiting_for_payment'
     },
 
-    startedAT: Date,
-    endsAt:Date,
+    startedAt: Date,
+    endsAt: Date,
 
-    userPayments: {
-    user1Paid: { type: Boolean, default: false },
-    user2Paid: { type: Boolean, default: false }
-  },
+    // Changed from user1Paid/user2Paid to an array of objects
+    payments: [{
+        user: { 
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User' 
+        },
+        hasPaid: { 
+            type: Boolean, 
+            default: false 
+        }
+    }],
 
-  streak: {
-    count: {
-      type: Number, 
-    }  }
+    streak: {
+        count: {
+            type: Number, 
+            default: 0
+        }  
+    }
 
-}, {timestamps:true})
+}, { timestamps: true });
 
 const Tasks = mongoose.model("tasks", TaskSchema);
 export default Tasks;

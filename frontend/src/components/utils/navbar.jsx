@@ -27,6 +27,13 @@ const Nav = () => {
           </Link>
 
           <Link
+            to="/mytasks"
+            className="hover:text-red-500 transition-colors duration-200"
+          >
+            My Tasks
+          </Link>
+
+          <Link
             to="/friends"
             className="hover:text-red-500 transition-colors duration-200"
           >
