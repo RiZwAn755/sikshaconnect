@@ -51,11 +51,20 @@ export const payForTask = async (req, res) => {
             { new: true }
         );
 
+        if (!task) {
+            return res.status(404).json({ success: false, message: "Task not found for this user" });
+        }
+
         // Optional: Check if ALL users have paid, to update the main task status
         const allPaid = task.payments.every(p => p.hasPaid === true);
         if (allPaid) {
+            const durationDays = Number(task.duration);
+            if (!Number.isFinite(durationDays) || durationDays <= 0) {
+                return res.status(400).json({ success: false, message: "Invalid task duration" });
+            }
             task.status = 'in_progress';
             task.startedAt = new Date();
+            task.endsAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
             // set endsAt based on duration
             await task.save();
         }
@@ -82,7 +91,27 @@ export const getUserTasks = async (req, res) => {
         .populate("participants", "name username email") // Populate participant details
         .populate("createdBy", "name username"); // Populate owner details
 
-        res.status(200).json({ success: true, tasks });
+        const hydratedTasks = tasks.map((task) => {
+            const taskObj = task.toObject();
+            const shouldComputeEndDate =
+                !taskObj.endsAt &&
+                taskObj.startedAt &&
+                Number(taskObj.duration) > 0 &&
+                ["in_progress", "completed", "expired"].includes(taskObj.status);
+
+            if (shouldComputeEndDate) {
+                const startMs = new Date(taskObj.startedAt).getTime();
+                if (!Number.isNaN(startMs)) {
+                    taskObj.endsAt = new Date(
+                        startMs + Number(taskObj.duration) * 24 * 60 * 60 * 1000
+                    );
+                }
+            }
+
+            return taskObj;
+        });
+
+        res.status(200).json({ success: true, tasks: hydratedTasks });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
