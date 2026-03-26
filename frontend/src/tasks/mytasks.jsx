@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/utils/loader.jsx";
@@ -8,6 +9,7 @@ const baseurl = import.meta.env.VITE_BASE_URL;
 const MyTasks = () => {
   const userid = localStorage.getItem("userid");
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const getEntityId = (value) => {
     if (!value) return "";
@@ -25,6 +27,31 @@ const MyTasks = () => {
     },
     enabled: !!userid,
   });
+
+  const contributeMutation = useMutation({
+    mutationFn: async (taskId) => {
+      await axios.put(`${baseurl}/api/task/contribute/${taskId}`, {}, { withCredentials: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userTasks", userid] });
+    },
+    onError: () => {
+      alert("Failed to contribute to task");
+    },
+  });
+
+  useEffect(() => {
+    const now = new Date();
+    const nextMidnight = new Date();
+    nextMidnight.setHours(24, 0, 0, 0);
+    const msUntilMidnight = nextMidnight.getTime() - now.getTime();
+
+    const timeoutId = setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: ["userTasks", userid] });
+    }, msUntilMidnight);
+
+    return () => clearTimeout(timeoutId);
+  }, [queryClient, userid]);
 
   if (isLoading) return <Loader />;
   if (error) return <h3 className="text-red-500 text-center mt-10">Failed to load tasks 😕</h3>;
@@ -79,6 +106,29 @@ const MyTasks = () => {
     return `${daysLeft} day${daysLeft === 1 ? "" : "s"} left`;
   };
 
+  const getStreakWindowLabel = (lastUpdatedAtValue) => {
+    if (!lastUpdatedAtValue) return "Streak window starts after first complete contribution cycle";
+
+    const lastUpdatedAt = new Date(lastUpdatedAtValue);
+    if (Number.isNaN(lastUpdatedAt.getTime())) return "Streak time not available";
+
+    const now = new Date();
+    const windowMs = 24 * 60 * 60 * 1000;
+    const elapsedMs = now.getTime() - lastUpdatedAt.getTime();
+
+    if (elapsedMs >= windowMs) return "24h window passed - next cycle resets streak";
+
+    const remainingHours = Math.ceil((windowMs - elapsedMs) / (60 * 60 * 1000));
+    return `${remainingHours}h left in streak window`;
+  };
+
+  const getDateKey = (dateValue) => {
+    if (!dateValue) return "";
+    const parsed = new Date(dateValue);
+    if (Number.isNaN(parsed.getTime())) return "";
+    return parsed.toISOString().slice(0, 10);
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -107,6 +157,16 @@ const MyTasks = () => {
             const statusConfig = getStatusConfig(task.status, task);
             const isCreator = String(task.createdBy?._id) === String(userid);
             const creatorName = task.createdBy?.name || task.createdBy?.username || "A Friend";
+            const myContributionEntry = (task.contribution || []).find(
+              (entry) => String(getEntityId(entry?.user)) === String(userid)
+            );
+            const hasContributed = myContributionEntry?.hasContributed === true;
+            const todayKey = getDateKey(new Date());
+            const contributionDayKey = getDateKey(task.contributionDay);
+            const hasContributedToday = hasContributed && contributionDayKey === todayKey;
+            const canContribute = task.status === "in_progress" && !hasContributedToday;
+            const isContributingThisTask =
+              contributeMutation.isPending && contributeMutation.variables === task._id;
             const unpaidUsers = (task.payments || [])
               .filter((payment) => payment?.hasPaid === false)
               .map((payment) => {
@@ -157,6 +217,18 @@ const MyTasks = () => {
                     </p>
                   </div>
 
+                  <div className="mb-4 rounded-lg border border-orange-200 bg-orange-50 p-3">
+                    <p className="text-xs font-semibold text-orange-800">
+                      Streak: {Number(task.streak?.count) || 0}
+                    </p>
+                    <p className="text-xs text-orange-700 mt-1">
+                      Last Updated: {formatTaskDate(task.streak?.lastUpdatedAt)}
+                    </p>
+                    <p className="text-xs text-orange-700 mt-1">
+                      {getStreakWindowLabel(task.streak?.lastUpdatedAt)}
+                    </p>
+                  </div>
+
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
                       ⏱ {task.duration} days
@@ -180,6 +252,26 @@ const MyTasks = () => {
                           </span>
                         ))}
                       </div>
+                    </div>
+                  )}
+
+                  {task.status === "in_progress" && (
+                    <div className="mb-4">
+                      <button
+                        onClick={() => contributeMutation.mutate(task._id)}
+                        disabled={!canContribute || isContributingThisTask}
+                        className={`w-full rounded-lg px-3 py-2 text-sm font-medium transition ${
+                          canContribute
+                            ? "bg-green-600 text-white hover:bg-green-700"
+                            : "bg-gray-100 text-gray-500 cursor-not-allowed"
+                        }`}
+                      >
+                        {isContributingThisTask
+                          ? "Submitting..."
+                          : hasContributedToday
+                          ? "Contribution Submitted Today"
+                          : "Contribute to Task"}
+                      </button>
                     </div>
                   )}
                 </div>

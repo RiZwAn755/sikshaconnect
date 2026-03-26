@@ -49,11 +49,31 @@ const TaskSchema = new mongoose.Schema({
         }
     }],
 
+    contribution: [{
+        user:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        hasContributed: {
+            type: Boolean,
+            default: false
+        }
+    }],
+
+    contributionDay: {
+        type: Date,
+        default: null
+    },
+
     streak: {
         count: {
             type: Number, 
             default: 0
-        }  
+        },
+        lastUpdatedAt: {
+            type: Date,
+            default: null
+        }
     }
 
 }, { timestamps: true });
