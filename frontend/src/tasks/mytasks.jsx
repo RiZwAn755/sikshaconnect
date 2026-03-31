@@ -123,12 +123,7 @@ const MyTasks = () => {
     return `${remainingHours}h left in streak window`;
   };
 
-  const getDateKey = (dateValue) => {
-    if (!dateValue) return "";
-    const parsed = new Date(dateValue);
-    if (Number.isNaN(parsed.getTime())) return "";
-    return parsed.toISOString().slice(0, 10);
-  };
+
 
   const getEffectiveStatus = (task) => {
     const endDate = task?.endsAt ? new Date(task.endsAt) : null;
@@ -174,9 +169,7 @@ const MyTasks = () => {
               (entry) => String(getEntityId(entry?.user)) === String(userid)
             );
             const hasContributed = myContributionEntry?.hasContributed === true;
-            const todayKey = getDateKey(new Date());
-            const contributionDayKey = getDateKey(task.contributionDay);
-            const hasContributedToday = hasContributed && contributionDayKey === todayKey;
+            const hasContributedToday = hasContributed;
             const canContribute = effectiveStatus === "in_progress" && !hasContributedToday;
             const isContributingThisTask =
               contributeMutation.isPending && contributeMutation.variables === task._id;
