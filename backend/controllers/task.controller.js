@@ -6,6 +6,25 @@ const getStartOfToday = () => {
     return today;
 };
 
+const STREAK_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+const getTaskInvestmentAmount = (task) => {
+    const durationDays = Number(task?.duration);
+    return Number.isFinite(durationDays) && durationDays > 0 ? durationDays * 10 : 25;
+};
+
+const getMaxStreakPercent = (task) => {
+    const maxStreakDays = Number(task?.maxStreak) || 0;
+    const totalDays = Number(task?.duration);
+
+    if (!Number.isFinite(totalDays) || totalDays <= 0) {
+        return 0;
+    }
+
+    const rawPercent = (maxStreakDays / totalDays) * 100;
+    return Math.max(0, Math.min(100, rawPercent));
+};
+
 const ensureDailyContributionCycle = (task) => {
     const todayStart = getStartOfToday();
     const currentContributionDay = task.contributionDay ? new Date(task.contributionDay) : null;
@@ -88,6 +107,33 @@ export const contributeToTask = async (req, res) => {
             return res.status(403).json({ success: false, message: "Only participants can contribute" });
         }
 
+        const now = new Date();
+        const endTime = task.endsAt ? new Date(task.endsAt).getTime() : NaN;
+        const hasEnded = !Number.isNaN(endTime) && endTime < now.getTime();
+
+        if (hasEnded) {
+            if (task.status !== "expired") {
+                task.status = "expired";
+                await task.save();
+            }
+
+            const maxStreakPercent = getMaxStreakPercent(task);
+            const investedAmount = getTaskInvestmentAmount(task);
+            const collectableAmount = (investedAmount * maxStreakPercent) / 100;
+
+            return res.status(400).json({
+                success: false,
+                message: `Task expired. You can collect ${maxStreakPercent}% of invested amount based on max streak.`,
+                task,
+                payout: {
+                    maxStreakDays: Number(task.maxStreak) || 0,
+                    maxStreakPercent,
+                    investedAmount,
+                    collectableAmount,
+                },
+            });
+        }
+
         if (!Array.isArray(task.contribution)) {
             task.contribution = [];
         }
@@ -119,12 +165,11 @@ export const contributeToTask = async (req, res) => {
          
         const allContributed = task.contribution.every(c => c.hasContributed === true);
         if (allContributed && task.status === 'in_progress') {
-            const now = new Date();
             const lastUpdatedAt = task.streak?.lastUpdatedAt ? new Date(task.streak.lastUpdatedAt) : null;
             const within24Hours =
                 lastUpdatedAt &&
                 !Number.isNaN(lastUpdatedAt.getTime()) &&
-                (now.getTime() - lastUpdatedAt.getTime()) <= 24 * 60 * 60 * 1000;
+            (now.getTime() - lastUpdatedAt.getTime()) < STREAK_WINDOW_MS;
 
             if (!task.streak) {
                 task.streak = { count: 0, lastUpdatedAt: null };
@@ -136,6 +181,11 @@ export const contributeToTask = async (req, res) => {
                 task.streak.count = 1;
             } else {
                 task.streak.count = 0;
+            }
+
+            const currentMaxStreak = Number(task.maxStreak) || 0;
+            if (task.streak.count > currentMaxStreak) {
+                task.maxStreak = task.streak.count;
             }
 
             task.streak.lastUpdatedAt = now;
@@ -205,15 +255,42 @@ export const getUserTasks = async (req, res) => {
         .populate("participants", "name username email") // Populate participant details
         .populate("createdBy", "name username"); // Populate owner details
 
+        const now = new Date();
+
         for (const task of tasks) {
-            const updated = ensureDailyContributionCycle(task);
-            if (updated) {
+            let shouldSave = ensureDailyContributionCycle(task);
+
+            const endTime = task.endsAt ? new Date(task.endsAt).getTime() : NaN;
+            const hasEnded = !Number.isNaN(endTime) && endTime < now.getTime();
+
+            if (hasEnded && task.status !== "expired") {
+                task.status = "expired";
+                shouldSave = true;
+            }
+
+            const streakLastUpdatedAt = task.streak?.lastUpdatedAt
+                ? new Date(task.streak.lastUpdatedAt)
+                : null;
+            const isStreakOverdue =
+                task.status === "in_progress" &&
+                streakLastUpdatedAt &&
+                !Number.isNaN(streakLastUpdatedAt.getTime()) &&
+                (now.getTime() - streakLastUpdatedAt.getTime()) >= STREAK_WINDOW_MS;
+
+            if (isStreakOverdue && (Number(task.streak?.count) || 0) !== 0) {
+                task.streak.count = 0;
+                shouldSave = true;
+            }
+
+            if (shouldSave) {
                 await task.save();
             }
         }
 
         const hydratedTasks = tasks.map((task) => {
             const taskObj = task.toObject();
+            const investedAmount = getTaskInvestmentAmount(taskObj);
+            const maxStreakPercent = getMaxStreakPercent(taskObj);
             const shouldComputeEndDate =
                 !taskObj.endsAt &&
                 taskObj.startedAt &&
@@ -227,6 +304,16 @@ export const getUserTasks = async (req, res) => {
                         startMs + Number(taskObj.duration) * 24 * 60 * 60 * 1000
                     );
                 }
+            }
+
+            if (taskObj.status === "expired") {
+                taskObj.expiredMeta = {
+                    maxStreakDays: Number(taskObj.maxStreak) || 0,
+                    maxStreakPercent,
+                    investedAmount,
+                    collectableAmount: (investedAmount * maxStreakPercent) / 100,
+                    message: `Task expired. You can collect ${maxStreakPercent}% of invested amount based on max streak.`,
+                };
             }
 
             return taskObj;

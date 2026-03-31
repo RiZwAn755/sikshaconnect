@@ -74,6 +74,10 @@ const TaskSchema = new mongoose.Schema({
             type: Date,
             default: null
         }
+    },
+    maxStreak: {
+        type: Number,
+        default: 0
     }
 
 }, { timestamps: true });

@@ -35,8 +35,9 @@ const MyTasks = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userTasks", userid] });
     },
-    onError: () => {
-      alert("Failed to contribute to task");
+    onError: (err) => {
+      const apiMessage = err?.response?.data?.message;
+      alert(apiMessage || "Failed to contribute to task");
     },
   });
 
@@ -129,6 +130,17 @@ const MyTasks = () => {
     return parsed.toISOString().slice(0, 10);
   };
 
+  const getEffectiveStatus = (task) => {
+    const endDate = task?.endsAt ? new Date(task.endsAt) : null;
+    const isOverdueByDate =
+      task?.status === "in_progress" &&
+      endDate &&
+      !Number.isNaN(endDate.getTime()) &&
+      endDate.getTime() < Date.now();
+
+    return isOverdueByDate ? "expired" : task?.status;
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -154,7 +166,8 @@ const MyTasks = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tasks.map((task) => {
-            const statusConfig = getStatusConfig(task.status, task);
+            const effectiveStatus = getEffectiveStatus(task);
+            const statusConfig = getStatusConfig(effectiveStatus, task);
             const isCreator = String(task.createdBy?._id) === String(userid);
             const creatorName = task.createdBy?.name || task.createdBy?.username || "A Friend";
             const myContributionEntry = (task.contribution || []).find(
@@ -164,9 +177,20 @@ const MyTasks = () => {
             const todayKey = getDateKey(new Date());
             const contributionDayKey = getDateKey(task.contributionDay);
             const hasContributedToday = hasContributed && contributionDayKey === todayKey;
-            const canContribute = task.status === "in_progress" && !hasContributedToday;
+            const canContribute = effectiveStatus === "in_progress" && !hasContributedToday;
             const isContributingThisTask =
               contributeMutation.isPending && contributeMutation.variables === task._id;
+            const maxStreak = Number(task?.maxStreak ?? task?.streak?.count ?? 0);
+            const totalDays = Number(task?.duration ?? 0);
+            const derivedExpiredPercent =
+              totalDays > 0 ? Math.min(100, Math.max(0, (maxStreak / totalDays) * 100)) : 0;
+            const expiredPercent = Number(
+              task?.expiredMeta?.maxStreakPercent ?? task?.expiredMeta?.lastStreakPercent ?? derivedExpiredPercent
+            );
+            const investedAmount = Number(task?.expiredMeta?.investedAmount ?? 0);
+            const collectableAmount = Number(
+              task?.expiredMeta?.collectableAmount ?? (investedAmount * expiredPercent) / 100
+            );
             const unpaidUsers = (task.payments || [])
               .filter((payment) => payment?.hasPaid === false)
               .map((payment) => {
@@ -239,7 +263,7 @@ const MyTasks = () => {
 
                   </div>
 
-                  {task.status === "waiting_for_payment" && unpaidUsers.length > 0 && (
+                  {effectiveStatus === "waiting_for_payment" && unpaidUsers.length > 0 && (
                     <div className="mb-4">
                       <p className="text-xs font-semibold text-yellow-700 mb-2">Pending Payment From:</p>
                       <div className="flex flex-wrap gap-2">
@@ -255,7 +279,19 @@ const MyTasks = () => {
                     </div>
                   )}
 
-                  {task.status === "in_progress" && (
+                  {effectiveStatus === "expired" && (
+                    <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3">
+                      <p className="text-xs font-semibold text-red-800">
+                        Your task has expired and you can collect the {expiredPercent.toFixed(2)}%
+                        amount of your total invested amount by contacting admin.
+                      </p>
+                      <p className="text-xs text-red-700 mt-1">
+                        Collectable: ₹{collectableAmount.toFixed(2)}
+                      </p>
+                    </div>
+                  )}
+
+                  {effectiveStatus === "in_progress" && (
                     <div className="mb-4">
                       <button
                         onClick={() => contributeMutation.mutate(task._id)}
