@@ -83,6 +83,7 @@ const Taskform = () => {
         }
     };
 
+    // value of task amount can be calculated based on duration or set to a fixed value. Here, we use a simple calculation for demonstration.
     const amountValue = duration ? Number(duration) * 10 : 25; // simple calculation
 
     if (isLoading) return <Loader />;
@@ -173,13 +174,13 @@ const Taskform = () => {
                             rows={3}
                         />
                     </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
-                            Duration (in hours) <span className="text-red-500">*</span>
+                            Duration (in Days) <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="number"
-                            min="0"
                             value={duration}
                             onChange={(e) => setDuration(e.target.value)}
                             className="mt-1 block w-full border border-gray-300 p-2 rounded-md shadow-sm"
