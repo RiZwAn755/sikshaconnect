@@ -5,6 +5,16 @@ import SendEmail from "../utils/sendemail.js";
 import { generateAccessToken, generateRefreshToken, generateResetToken } from "../utils/generatetokens.js";
 import { reset_token_secret, refresh_token_secret} from "../config/config.js";
 
+const isProduction = process.env.NODE_ENV === "production";
+
+// Cookie options: strict + secure in production, lax + insecure in dev
+// (SameSite=strict cannot be used cross-origin in local dev with different ports)
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,          // HTTPS only in production
+  sameSite: isProduction ? "strict" : "lax",
+};
+
 export const signup = async (req, resp) => {
   try {
     const { name, username, email, password } = req.body;
@@ -53,16 +63,8 @@ export const login = async (req, resp) => {
     res.refreshToken = refreshToken;
     await res.save();
      
-    resp.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
-    resp.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
+    resp.cookie("accessToken", accessToken, cookieOptions);
+    resp.cookie("refreshToken", refreshToken, cookieOptions);
     resp.status(200).json({ message: "login successfull", userid: res._id });
   } catch (error) {
     resp.status(500).json({ message: "login failed", error: error.message });
@@ -78,16 +80,8 @@ export const logout = async (req, resp) => {
       await user.save();
     }
   }
-  resp.clearCookie("accessToken", {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-  });
-  resp.clearCookie("refreshToken", {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-  });
+  resp.clearCookie("accessToken", cookieOptions);
+  resp.clearCookie("refreshToken", cookieOptions);
 
   resp.json({ message: "logged out successfully" });
 };
@@ -153,11 +147,7 @@ export const refresh = async (req, resp) => {
     }
 
     const newAccessToken = generateAccessToken(user.toObject());
-    resp.cookie("accessToken", newAccessToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
+    resp.cookie("accessToken", newAccessToken, cookieOptions);
     resp.json({ message: "access token refreshed", accessToken: newAccessToken });
   } catch (err) {
     resp.status(401).json({ message: "invalid refresh token" });

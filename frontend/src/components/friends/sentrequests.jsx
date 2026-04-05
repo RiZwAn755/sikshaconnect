@@ -9,7 +9,8 @@ const fetchRequests = async () => {
   const res = await axios.get(
     `${baseurl}/api/friendship/friends`,
     {
-      params: { user1: userid }
+      params: { user1: userid },
+      withCredentials: true,
     }
   );
 
