@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 
 const TaskSchema = new mongoose.Schema({
-    // Changed from friendshipId to an array of participants
+    //  an array of participants
     participants: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
     }],
     
-    // Who created the task (optional but helpful)
+    // Who created the task 
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -37,7 +37,7 @@ const TaskSchema = new mongoose.Schema({
     startedAt: Date,
     endsAt: Date,
 
-    // Changed from user1Paid/user2Paid to an array of objects
+    // an array of objects
     payments: [{
         user: { 
             type: mongoose.Schema.Types.ObjectId, 

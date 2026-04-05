@@ -6,8 +6,9 @@ const getStartOfToday = () => {
     return today;
 };
 
-const STREAK_WINDOW_MS = 24 * 60 * 60 * 1000;
+const STREAK_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h in ms
 
+  // this is for calculate investment amount of task based on no. of days of tasks * 10 else bydefault = 25
 const getTaskInvestmentAmount = (task) => {
     const durationDays = Number(task?.duration);
     return Number.isFinite(durationDays) && durationDays > 0 ? durationDays * 10 : 25;
