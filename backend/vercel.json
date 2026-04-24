@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/serverless.js",
+      "src": "serverless.js",
       "use": "@vercel/node",
       "config": { "maxLambdaSize": "50mb" }
     }
@@ -10,8 +10,11 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/serverless.js"
+      "dest": "/serverless.js"
+    },
+    {
+      "src": "/",
+      "dest": "/serverless.js"
     }
   ]
-
 }
