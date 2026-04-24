@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import axios from "axios";
 
 const ResetPassword = () => {
@@ -9,6 +9,7 @@ const ResetPassword = () => {
   const [newpass, setNewpass] = useState("");
   const [confirmpass, setConfirmpass] = useState("");
   const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const baseurl = import.meta.env.VITE_BASE_URL;
 
@@ -16,91 +17,92 @@ const ResetPassword = () => {
     e.preventDefault();
 
     if (newpass !== confirmpass) {
-      alert("Passwords do not match");
+      setMsg({ type: 'error', text: "Passwords do not match" });
       return;
     }
 
+    setLoading(true);
     try {
       const res = await axios.post(
         `${baseurl}/api/auth/reset-password/${token}`,
-        {
-          newPassword: newpass,
-        }
+        { newPassword: newpass }
       );
 
-      setMsg(res.data.message);
-      navigate("/login");
-
+      setMsg({ type: 'success', text: res.data.message });
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setMsg("Something went wrong");
-      console.log(err);
+      setMsg({ type: 'error', text: err?.response?.data?.message || "Something went wrong" });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="w-full h-screen flex justify-center items-center px-4 bg-white">
-      <div className="max-w-md w-full bg-white border border-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.06)] rounded-2xl p-8">
-
-       
-        <h2 className="text-2xl font-semibold text-gray-900 text-center tracking-tight">
-          Reset Password
-        </h2>
-
-        <p className="text-center text-sm text-gray-500 mt-2">
-          Enter your new password to regain access
-        </p>
-
+    <div className="min-h-[80vh] flex items-center justify-center bg-slate-50 px-4 py-12">
+      <div className="w-full max-w-md">
         
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        <div className="text-center mb-8">
+           <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+             Set new password
+           </h2>
+           <p className="text-sm text-gray-500 mt-2">
+             Must be at least 8 characters long
+           </p>
+        </div>
 
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              New Password
-            </label>
-            <input
-              type="password"
-              value={newpass}
-              onChange={(e) => setNewpass(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none 
-                         focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
-              placeholder="Enter new password"
-              required
-            />
-          </div>
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                New Password
+              </label>
+              <input
+                type="password"
+                value={newpass}
+                onChange={(e) => setNewpass(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 
+                           placeholder-gray-400 focus:outline-none focus:ring-2 
+                           focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm"
+                placeholder="••••••••"
+                required
+              />
+            </div>
 
-        
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              value={confirmpass}
-              onChange={(e) => setConfirmpass(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none 
-                         focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
-              placeholder="Confirm new password"
-              required
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Confirm new password
+              </label>
+              <input
+                type="password"
+                value={confirmpass}
+                onChange={(e) => setConfirmpass(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 
+                           placeholder-gray-400 focus:outline-none focus:ring-2 
+                           focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm"
+                placeholder="••••••••"
+                required
+              />
+            </div>
 
-          
-          <button
-            type="submit"
-            className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl 
-                       text-lg transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
-          >
-            Reset Password
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg 
+                         text-sm transition-all duration-200 shadow-sm mt-2"
+            >
+              {loading ? "Resetting..." : "Reset password"}
+            </button>
+          </form>
 
-       
-        {msg && (
-          <p className="mt-4 text-center text-sm font-medium text-gray-700">
-            {msg}
-          </p>
-        )}
+          {msg && (
+            <div className={`mt-4 p-3 rounded-lg text-sm font-medium text-center ${
+              msg.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {msg.text}
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );

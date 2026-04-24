@@ -4,11 +4,31 @@ import debounce from "lodash.debounce";
 
 const baseurl = import.meta.env.VITE_BASE_URL;
 
+// Mini avatar for search results
+const MiniAvatar = ({ name }) => {
+  const gradients = [
+    "from-violet-500 to-purple-600",
+    "from-blue-500 to-cyan-500",
+    "from-emerald-500 to-teal-500",
+    "from-orange-500 to-amber-500",
+    "from-pink-500 to-rose-500",
+  ];
+  const initial = (name || "?").charAt(0).toUpperCase();
+  const idx = initial.charCodeAt(0) % gradients.length;
+  return (
+    <div
+      className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradients[idx]} flex items-center justify-center flex-shrink-0 shadow-sm`}
+    >
+      <span className="text-white font-semibold text-xs">{initial}</span>
+    </div>
+  );
+};
+
 const Findfriends = () => {
   const [username, setUsername] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState("");
+  const [sentIds, setSentIds] = useState(new Set());
   const me = localStorage.getItem("userid");
 
   const fetchUsers = async (value) => {
@@ -16,21 +36,19 @@ const Findfriends = () => {
       setUsers([]);
       return;
     }
-
     try {
       setLoading(true);
       const res = await axios.post(`${baseurl}/api/user/search`, {
         username: value,
       });
       setUsers(res.data.users || []);
-    } catch (err) {
+    } catch {
       setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
- 
   const debouncedSearch = debounce(fetchUsers, 1000);
 
   useEffect(() => {
@@ -44,69 +62,89 @@ const Findfriends = () => {
         user1: me,
         user2: userId,
       });
-
+      setSentIds((prev) => new Set([...prev, userId]));
       alert(`Friend request sent to ${uname}`);
-    } catch (err) {
+    } catch {
       alert("Request already sent or error occurred");
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
-      <div className="w-full max-w-xl bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl">
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-wide text-center">
-          Find <span className="text-red-500">Friends</span>
-        </h1>
-        <p className="text-sm text-gray-400 text-center mt-2">
-          Search users by username
-        </p>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
-          className="mt-8 flex flex-col sm:flex-row gap-4"
-        >
-          <input
-            type="text"
-            placeholder="Enter username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition"
-          />
-
-          <button
-            type="submit"
-            className="bg-red-600 hover:bg-red-700 transition rounded-xl px-6 py-3 text-sm font-medium tracking-wide"
-          >
-            Search
-          </button>
-        </form>
-
-        <div className="mt-6">
-          {loading && <p className="text-gray-400 text-sm">Searching...</p>}
-
-          {users.length > 0 && (
-            <div className="space-y-3">
-              {users.map((u) => (
-                <div
-                  key={u._id}
-                  className="flex items-center justify-between bg-black/40 border border-white/10 rounded-xl p-4"
-                >
-                  <p className="text-sm font-medium">{u.username}</p>
-
-                  <button
-                    onClick={() => handleAddFriend(u._id, u.username)}
-                    className="text-sm px-4 py-2 rounded-lg bg-white text-black hover:bg-gray-200 transition"
-                  >
-                    Add Friend
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+    <div className="space-y-3">
+      {/* Section heading */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-gray-700">Find People</h2>
+        {loading && (
+          <span className="text-xs text-gray-400 animate-pulse">Searching…</span>
+        )}
       </div>
+
+      {/* Search input */}
+      <div className="relative">
+        <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <svg
+            className="w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+            />
+          </svg>
+        </span>
+        <input
+          type="text"
+          placeholder="Search by username…"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="w-full pl-9 pr-4 py-2.5 text-sm bg-slate-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 transition placeholder-gray-400"
+        />
+      </div>
+
+      {/* Results */}
+      {users.length > 0 && (
+        <div className="space-y-2 pt-1">
+          {users.map((u) => {
+            const alreadySent = sentIds.has(u._id);
+            return (
+              <div
+                key={u._id}
+                className="flex items-center gap-3 bg-slate-50 border border-gray-200 rounded-xl px-4 py-3 hover:border-violet-200 hover:bg-violet-50 transition-all duration-150"
+              >
+                <MiniAvatar name={u.username} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-800 truncate">
+                    {u.name || u.username}
+                  </p>
+                  <p className="text-xs text-gray-400 truncate">@{u.username}</p>
+                </div>
+                <button
+                  onClick={() => handleAddFriend(u._id, u.username)}
+                  disabled={alreadySent}
+                  className={`text-xs px-4 py-1.5 rounded-lg font-medium transition-all duration-200
+                    ${alreadySent
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                      : "bg-violet-600 hover:bg-violet-700 text-white shadow-sm hover:shadow-md"
+                    }`}
+                >
+                  {alreadySent ? "Sent ✓" : "Add Friend"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* No results */}
+      {!loading && username.length > 0 && users.length === 0 && (
+        <p className="text-xs text-gray-400 text-center py-3">
+          No users found for "<span className="font-medium text-gray-600">{username}</span>"
+        </p>
+      )}
     </div>
   );
 };

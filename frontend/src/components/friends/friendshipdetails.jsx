@@ -15,7 +15,6 @@ const fetchFriendshipDetails = async (friendshipId) => {
   return res.data.friendship;
 };
 
-
 const FriendshipDetails = () => {
   const { friendshipId } = useParams();
   const navigate = useNavigate();
@@ -28,131 +27,131 @@ const FriendshipDetails = () => {
     staleTime: 10000,
   });
 
-  
+  const u1 = friendship?.user1;
+  const u2Raw = friendship?.user2;
+  const u2 = Array.isArray(u2Raw) ? u2Raw[0] : u2Raw;
+  const friend = u1 && u1._id === userid ? u2 : u1;
 
-     const removeMutateFriend = useMutation({
+  const removeMutateFriend = useMutation({
     mutationFn: async () => {
-              await axios.delete(`${baseurl}/api/friendship/${friendshipId}`, {
-              data: { user1: u1._id, user2: u2._id },
-             withCredentials: true,
+      await axios.delete(`${baseurl}/api/friendship/${friendshipId}`, {
+        data: { user1: u1._id, user2: u2._id },
+        withCredentials: true,
       });
     },
     onSuccess: async () => {
-              alert(`You have removed ${friend.username || friend.name} from your friends list.`);
-              await queryClient.invalidateQueries({ queryKey: ["friendlist"] });
-              navigate("/friendlist");
+      alert(`You have removed ${friend?.username || friend?.name} from your friends list.`);
+      await queryClient.invalidateQueries({ queryKey: ["friendlist"] });
+      navigate("/friendlist");
     },
     onError: (err) => {
-              console.error("Error removing friend:", err);
-              alert("Unable to remove friend");
+      console.error("Error removing friend:", err);
+      alert("Unable to remove friend");
     },
-
   });
 
-
   if (isLoading) return <Loader />;
-  if (error) return <h3 className="text-red-500">Something went wrong</h3>;
+  if (error || !friend) return <h3 className="text-red-500 text-center mt-10">Something went wrong</h3>;
 
-  const u1 = friendship.user1;
-  const u2 = Array.isArray(friendship.user2) ? friendship.user2[0] : friendship.user2;
-  const friend = u1._id === userid ? u2 : u1;
-
-
-
+  const displayName = friend.name || friend.username || "Unknown";
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
 
-      
-      <div className="flex items-center gap-4">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-2">
         <button
           onClick={() => navigate(-1)}
-          className="text-sm text-gray-600 hover:text-black"
+          className="text-gray-500 hover:text-gray-900 transition flex items-center justify-center p-2 rounded-lg hover:bg-gray-100"
         >
-          ← Back
+           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+           </svg>
         </button>
-        <h1 className="text-3xl font-bold text-black">
-          Friendship Details
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+          Connection Profile
         </h1>
       </div>
 
-      
-      <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-6 space-y-6">
-
-       
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center">
-            <span className="text-lg font-medium text-gray-600">
-              {(friend.name || friend.username || "").charAt(0)}
-            </span>
-          </div>
-
-          <div>
-            <div className="text-lg font-semibold text-black">
-              {friend.name || friend.username}
-            </div>
-            <div className="text-sm text-gray-500">
-              @{friend.username}
-            </div>
-          </div>
-        </div>
-
-       
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-          <div>
-            <p className="text-sm text-gray-500">Status</p>
-            <p className="font-medium text-black">
-              {friendship.status}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">Connected Since</p>
-            <p className="font-medium text-black">
-              {friendship.connectedAt
-                ? new Date(friendship.connectedAt).toLocaleDateString()
-                : "—"}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">Streak Count</p>
-            <p className="font-medium text-black">
-              {friendship.streak?.count || 0}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">Last Streak Update</p>
-            <p className="font-medium text-black">
-              {friendship.streak?.updatedAt
-                ? new Date(friendship.streak.updatedAt).toLocaleDateString()
-                : "—"}
-            </p>
-          </div>
-        </div>
-
+      {/* Main Card */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         
-        <div className="border-t pt-4">
-          <p className="text-sm text-gray-500 mb-1">Current Task</p>
-          <p className="font-medium text-black">
-            {friendship.currentTask
-              ? friendship.currentTask.title
-              : "No active task"}
-          </p>
+        {/* Profile Header Area */}
+        <div className="p-6 sm:p-8 flex items-center gap-5 border-b border-gray-100 bg-slate-50/50">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-2xl font-bold text-white shadow-sm shrink-0">
+             {initial}
+          </div>
+
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">{displayName}</h2>
+            <p className="text-sm text-gray-500 font-medium">@{friend.username}</p>
+          </div>
         </div>
 
-        
-        <div className="flex gap-3 pt-4 border-t">
-          <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
-            Message
-          </button>
+        {/* Stats Grid */}
+        <div className="p-6 sm:p-8">
+           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</p>
+                <p className="font-medium text-gray-900 flex items-center gap-1.5">
+                   <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                   {friendship.status}
+                </p>
+              </div>
 
-          <button onClick={()=> removeMutateFriend.mutate()} className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
-            Remove Friend
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Connected</p>
+                <p className="font-medium text-gray-900">
+                  {friendship.connectedAt ? new Date(friendship.connectedAt).toLocaleDateString() : "—"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Streak</p>
+                <p className="font-medium text-gray-900 flex items-center gap-1">
+                  🔥 {friendship.streak?.count || 0}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Last Update</p>
+                <p className="font-medium text-gray-900">
+                  {friendship.streak?.updatedAt ? new Date(friendship.streak.updatedAt).toLocaleDateString() : "—"}
+                </p>
+              </div>
+           </div>
+        </div>
+
+        {/* Current Task */}
+        <div className="p-6 sm:p-8 border-t border-gray-100 bg-slate-50/30">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Current Task</p>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+             <p className="font-medium text-gray-900">
+               {friendship.currentTask ? friendship.currentTask.title : "No active task currently."}
+             </p>
+          </div>
+        </div>
+
+        {/* Actions Footer */}
+        <div className="p-6 border-t border-gray-100 flex flex-wrap gap-3 bg-gray-50/50">
+          <button className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition shadow-sm">
+            Send Message
+          </button>
+          
+          <button 
+            onClick={() => {
+               if(window.confirm("Are you sure you want to remove this connection?")) {
+                  removeMutateFriend.mutate()
+               }
+            }} 
+            disabled={removeMutateFriend.isPending}
+            className="px-5 py-2.5 bg-white border border-gray-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 hover:border-red-200 transition shadow-sm ml-auto"
+          >
+            {removeMutateFriend.isPending ? "Removing..." : "Remove Connection"}
           </button>
         </div>
+
       </div>
     </div>
   );

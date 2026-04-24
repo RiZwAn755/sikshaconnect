@@ -1,26 +1,23 @@
 import React from "react";
 
-const Loader = () => {
+const Loader = ({ text = "Loading..." }) => {
   return (
     <div
       role="status"
       aria-live="polite"
       aria-busy="true"
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black"
+      className="flex flex-col items-center justify-center py-12 w-full"
     >
-
       <div className="relative flex items-center justify-center">
-
-        <div className="h-24 w-24 rounded-full border-4 border-red-600 border-t-transparent animate-spin" />
-
-
-        <div className="absolute h-10 w-10 rounded-full bg-white animate-pulse" />
+        {/* Simple spinner */}
+        <div className="h-10 w-10 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin" />
       </div>
 
-
-      <p className="mt-6 text-xs tracking-[0.35em] text-red-500 animate-fade">
-        LOADING
-      </p>
+      {text && (
+        <p className="mt-4 text-sm font-medium text-gray-500 tracking-wide animate-pulse">
+          {text}
+        </p>
+      )}
     </div>
   );
 };

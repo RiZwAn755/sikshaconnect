@@ -1,9 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import Loader from "../components/utils/loader.jsx";
 import PayButton from "../components/payments/paybutton.jsx";
-import { useState } from "react";
 
 const baseurl = import.meta.env.VITE_BASE_URL;
 
@@ -27,30 +24,24 @@ const PendingTasks = () => {
     enabled: !!userid,
   });
 
-  if (isLoading) return null; // Silently load on home page
+  if (isLoading || error || !data) return null;
 
-  if (error || !data) return null;
-
-  // Show all tasks that are still waiting for payment so users can see who is pending.
-  const pendingTasks = data.filter((t) => {
-    return t.status === "waiting_for_payment";
-  });
+  const pendingTasks = data.filter((t) => t.status === "waiting_for_payment");
 
   if (pendingTasks.length === 0) return null;
 
   return (
     <section className="mb-6 space-y-4">
       {pendingTasks.map((task) => {
-        // Calculate amount to pay based on duration * 10 or default 25
         const amountValue = task.duration ? Number(task.duration) * 10 : 25;
-        // Check if the user is the creator
         const isCreator = String(task.createdBy._id) === String(userid);
-        // Find creator details
-        const creatorName = task.createdBy?.name || task.createdBy?.username || "A friend";
+        const creatorName = task.createdBy?.name || task.createdBy?.username || "A connection";
+        
         const myPaymentEntry = (task.payments || []).find(
           (p) => String(getEntityId(p?.user)) === String(userid)
         );
         const hasCurrentUserPaid = myPaymentEntry?.hasPaid === true;
+        
         const unpaidUsers = (task.payments || [])
           .filter((payment) => payment?.hasPaid === false)
           .map((payment) => {
@@ -58,70 +49,64 @@ const PendingTasks = () => {
             const participant = (task.participants || []).find(
               (p) => String(getEntityId(p)) === paymentUserId
             );
-
-            if (paymentUserId === String(userid)) {
-              return "You";
-            }
-
-            return participant?.username
-              ? `@${participant.username}`
-              : participant?.name || "Unknown user";
+            if (paymentUserId === String(userid)) return "You";
+            return participant?.username ? `@${participant.username}` : participant?.name || "Unknown user";
           });
 
         return (
           <div
             key={task._id}
-            className="flex flex-col sm:flex-row items-center justify-between border-l-4 border-red-500 bg-red-50 p-4 rounded-r-2xl shadow-sm gap-4"
+            className="flex flex-col md:flex-row items-center justify-between border-l-4 border-amber-500 bg-amber-50/50 border border-y-amber-200 border-r-amber-200 p-5 rounded-r-2xl shadow-sm gap-6"
           >
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">
-                ⚠️ Action Required: Group Task Payment
-              </h2>
-              <p className="text-sm text-gray-700 mt-1">
-                {isCreator 
-                  ? "You created the task " 
-                  : `${creatorName} invited you to the group task `}
-                <span className="font-semibold text-black">"{task.title}"</span>. 
+            <div className="flex-1 w-full">
+              <div className="flex items-center gap-2 mb-1.5">
+                 <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                 </svg>
+                 <h2 className="text-base font-semibold text-gray-900">
+                   Action Required: Task Payment
+                 </h2>
+              </div>
+              
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {isCreator ? "You created the task " : `${creatorName} invited you to the task `}
+                <span className="font-semibold text-gray-900">"{task.title}"</span>. 
                 {hasCurrentUserPaid ? (
-                  <span className="font-semibold text-green-700"> Your payment is done. Waiting for others.</span>
+                  <span className="font-medium text-emerald-700 ml-1">Your payment is complete. Waiting for others.</span>
                 ) : (
                   <>
-                    Please pay your share of <span className="font-semibold text-red-600">₹{amountValue}</span> to proceed.
+                    {" "}Please pay your share of <span className="font-semibold text-amber-700">₹{amountValue}</span> to activate the task.
                   </>
                 )}
               </p>
+              
               {task.description && (
-                <p className="text-xs text-gray-500 mt-1 italic">"{task.description}"</p>
+                <p className="text-sm text-gray-500 mt-2 italic bg-white/50 px-3 py-2 rounded-lg border border-amber-100/50">"{task.description}"</p>
               )}
+              
               {unpaidUsers.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-xs font-semibold text-red-700">Pending from:</p>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {unpaidUsers.map((userLabel, index) => (
-                      <span
-                        key={`${task._id}-unpaid-${index}`}
-                        className="text-xs px-2 py-1 rounded-md bg-red-100 text-red-800 border border-red-200"
-                      >
-                        {userLabel}
-                      </span>
-                    ))}
-                  </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider">Pending from:</p>
+                  {unpaidUsers.map((userLabel, index) => (
+                    <span
+                      key={`${task._id}-unpaid-${index}`}
+                      className="text-xs px-2.5 py-1 rounded-md bg-white border border-amber-200 text-amber-700 shadow-sm"
+                    >
+                      {userLabel}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>
 
-            <div className="flex shrink-0 -mt-8">
-              {/* PayButton normally renders its own huge card, so we might need a custom inline button here if PayButton is bulky.
-                  Wait, PayButton returns `<div className="w-full flex justify-center...">...</div>` 
-                  It's a huge component. Let's reuse it anyway, but wait, it will look massive inside a small banner list!
-                  For now, we'll just embed it and the user can refactor PayButton if it's too big.
-              */}
-              {!hasCurrentUserPaid && (
-                <div className="scale-75 origin-right">
-                  <PayButton amountvalue={amountValue} taskId={task._id} />
+            {!hasCurrentUserPaid && (
+              <div className="shrink-0 w-full md:w-auto bg-white rounded-xl shadow-sm border border-amber-100 overflow-hidden min-w-[280px]">
+                {/* PayButton is injected here - scaling it slightly down to fit banner format nicely */}
+                <div className="transform scale-90 origin-center -my-4">
+                   <PayButton amountvalue={amountValue} taskId={task._id} />
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         );
       })}

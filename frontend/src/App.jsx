@@ -3,6 +3,7 @@ import { lazy } from "react";
 
 import Layout from "./components/layout/layout";
 import PrivateComponent from "./components/auth/privatecomponent";
+import PublicRoute from "./components/auth/publicroute";
 
 const Login = lazy(() => import("./components/auth/login"));
 const Register = lazy(() => import("./components/auth/register"));
@@ -33,11 +34,14 @@ function App() {
         {/* for lazy load  */}
         <Route element={<Layout />}> 
 
-          <Route path="/landing" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Register />} />
-          <Route path="/forgot-pass" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route element={<PublicRoute />}>
+            <Route path="/landing" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Register />} />
+            <Route path="/forgot-pass" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+          </Route>
+          
           <Route path="*" element={<NotFound />} />
           
            <Route element={<PrivateComponent />}>

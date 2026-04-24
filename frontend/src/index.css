@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+}
+
 @keyframes fade {
 
   0%,

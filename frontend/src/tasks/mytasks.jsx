@@ -55,25 +55,23 @@ const MyTasks = () => {
   }, [queryClient, userid]);
 
   if (isLoading) return <Loader />;
-  if (error) return <h3 className="text-red-500 text-center mt-10">Failed to load tasks 😕</h3>;
+  if (error) return <h3 className="text-red-500 text-center mt-10 font-medium">Failed to load tasks 😕</h3>;
 
   const getStatusConfig = (status, task) => {
     switch (status) {
       case "completed":
-        return { label: "Completed", color: "bg-green-100 text-green-700 border-green-200" };
+        return { label: "Completed", color: "bg-emerald-50 text-emerald-700 border-emerald-200" };
       case "in_progress":
         return {
           label: "In Progress",
-          color: "bg-blue-100 text-blue-700 border-blue-200",
-          startDate: task?.startedAt,
-          endDate: task?.endsAt,
+          color: "bg-blue-50 text-blue-700 border-blue-200",
         };
       case "waiting_for_payment":
-        return { label: "Pending Payment", color: "bg-yellow-100 text-yellow-700 border-yellow-200" };
+        return { label: "Pending Payment", color: "bg-amber-50 text-amber-700 border-amber-200" };
       case "expired":
-        return { label: "Expired", color: "bg-red-100 text-red-700 border-red-200" };
+        return { label: "Expired", color: "bg-red-50 text-red-700 border-red-200" };
       default:
-        return { label: "Unknown status", color: "bg-gray-100 text-gray-700 border-gray-200" };
+        return { label: "Unknown status", color: "bg-gray-50 text-gray-700 border-gray-200" };
     }
   };
 
@@ -108,22 +106,20 @@ const MyTasks = () => {
   };
 
   const getStreakWindowLabel = (lastUpdatedAtValue) => {
-    if (!lastUpdatedAtValue) return "Streak window starts after first complete contribution cycle";
+    if (!lastUpdatedAtValue) return "Starts after first complete cycle";
 
     const lastUpdatedAt = new Date(lastUpdatedAtValue);
-    if (Number.isNaN(lastUpdatedAt.getTime())) return "Streak time not available";
+    if (Number.isNaN(lastUpdatedAt.getTime())) return "Time not available";
 
     const now = new Date();
     const windowMs = 24 * 60 * 60 * 1000;
     const elapsedMs = now.getTime() - lastUpdatedAt.getTime();
 
-    if (elapsedMs >= windowMs) return "24h window passed - next cycle resets streak";
+    if (elapsedMs >= windowMs) return "Window passed - next cycle resets streak";
 
     const remainingHours = Math.ceil((windowMs - elapsedMs) / (60 * 60 * 1000));
-    return `${remainingHours}h left in streak window`;
+    return `${remainingHours}h left in window`;
   };
-
-
 
   const getEffectiveStatus = (task) => {
     const endDate = task?.endsAt ? new Date(task.endsAt) : null;
@@ -137,53 +133,62 @@ const MyTasks = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">My Tasks</h1>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-20">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">My Tasks</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage and track your active study tasks.</p>
+        </div>
         <button
           onClick={() => navigate("/friendlist")}
-          className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+          className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm font-medium text-sm flex items-center justify-center gap-2 w-full sm:w-auto"
         >
-          + New Group Task
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+          New Task
         </button>
       </div>
 
+      {/* Empty State */}
       {!tasks || tasks.length === 0 ? (
-        <div className="text-center bg-gray-50 border border-gray-200 rounded-2xl py-16">
-          <p className="text-gray-500 mb-4">You have no tasks yet.</p>
-          <button
-            onClick={() => navigate("/friendlist")}
-            className="text-red-600 font-medium hover:underline"
-          >
-            Create one now →
-          </button>
+        <div className="flex flex-col items-center justify-center py-16 bg-white border border-gray-200 rounded-2xl shadow-sm">
+           <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+             <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+           </div>
+           <p className="text-gray-900 font-semibold text-lg">No tasks found</p>
+           <p className="text-gray-500 text-sm mt-1 max-w-sm text-center">You haven't created or joined any tasks yet. Create one to get started.</p>
+           <button
+             onClick={() => navigate("/friendlist")}
+             className="mt-6 text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1"
+           >
+             Create a task <span aria-hidden="true">&rarr;</span>
+           </button>
         </div>
       ) : (
+        /* Tasks Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tasks.map((task) => {
             const effectiveStatus = getEffectiveStatus(task);
             const statusConfig = getStatusConfig(effectiveStatus, task);
             const isCreator = String(task.createdBy?._id) === String(userid);
             const creatorName = task.createdBy?.name || task.createdBy?.username || "A Friend";
+            
             const myContributionEntry = (task.contribution || []).find(
               (entry) => String(getEntityId(entry?.user)) === String(userid)
             );
-            const hasContributed = myContributionEntry?.hasContributed === true;
-            const hasContributedToday = hasContributed;
+            const hasContributedToday = myContributionEntry?.hasContributed === true;
             const canContribute = effectiveStatus === "in_progress" && !hasContributedToday;
-            const isContributingThisTask =
-              contributeMutation.isPending && contributeMutation.variables === task._id;
+            const isContributingThisTask = contributeMutation.isPending && contributeMutation.variables === task._id;
+            
             const maxStreak = Number(task?.maxStreak ?? task?.streak?.count ?? 0);
             const totalDays = Number(task?.duration ?? 0);
-            const derivedExpiredPercent =
-              totalDays > 0 ? Math.min(100, Math.max(0, (maxStreak / totalDays) * 100)) : 0;
-            const expiredPercent = Number(
-              task?.expiredMeta?.maxStreakPercent ?? task?.expiredMeta?.lastStreakPercent ?? derivedExpiredPercent
-            );
+            const derivedExpiredPercent = totalDays > 0 ? Math.min(100, Math.max(0, (maxStreak / totalDays) * 100)) : 0;
+            const expiredPercent = Number(task?.expiredMeta?.maxStreakPercent ?? task?.expiredMeta?.lastStreakPercent ?? derivedExpiredPercent);
+            
             const investedAmount = Number(task?.expiredMeta?.investedAmount ?? 0);
-            const collectableAmount = Number(
-              task?.expiredMeta?.collectableAmount ?? (investedAmount * expiredPercent) / 100
-            );
+            const collectableAmount = Number(task?.expiredMeta?.collectableAmount ?? (investedAmount * expiredPercent) / 100);
+            
             const unpaidUsers = (task.payments || [])
               .filter((payment) => payment?.hasPaid === false)
               .map((payment) => {
@@ -191,79 +196,80 @@ const MyTasks = () => {
                 const participant = (task.participants || []).find(
                   (p) => String(getEntityId(p)) === paymentUserId
                 );
-
                 if (paymentUserId === String(userid)) return "You";
-                return participant?.username
-                  ? `@${participant.username}`
-                  : participant?.name || "Unknown user";
+                return participant?.username ? `@${participant.username}` : participant?.name || "Unknown";
               });
 
             return (
               <div
                 key={task._id}
-                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between h-full"
+                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-200 flex flex-col h-full relative overflow-hidden"
               >
-                <div>
-                  <div className="flex justify-between items-start mb-4">
-                    <h2 className="text-xl font-semibold text-gray-900 break-words">
+                {/* Decorative top accent line based on status */}
+                <div className={`absolute top-0 left-0 w-full h-1 ${
+                    effectiveStatus === 'completed' ? 'bg-emerald-500' :
+                    effectiveStatus === 'in_progress' ? 'bg-blue-500' :
+                    effectiveStatus === 'waiting_for_payment' ? 'bg-amber-500' : 'bg-red-500'
+                }`}></div>
+
+                <div className="flex-1 flex flex-col">
+                  {/* Header */}
+                  <div className="flex justify-between items-start gap-4 mb-3">
+                    <h2 className="text-lg font-bold text-gray-900 line-clamp-2 leading-tight">
                       {task.title}
                     </h2>
-                    <span
-                      className={`px-3 py-1 text-xs font-semibold rounded-full border ${statusConfig.color}`}
-                    >
+                    <span className={`shrink-0 px-2.5 py-1 text-xs font-semibold rounded-md border ${statusConfig.color}`}>
                       {statusConfig.label}
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-3 min-h-[40px]">
-                    {task.description || "No description provided."}
+                  <p className="text-sm text-gray-500 mb-5 line-clamp-2 min-h-[40px] leading-relaxed">
+                    {task.description || <span className="italic opacity-70">No description provided</span>}
                   </p>
 
-                  <div className="mb-3 space-y-1 text-xs text-gray-600">
-                    <p>
-                      <span className="font-medium text-gray-700">Start Date:</span>{" "}
-                      {formatTaskDate(task.startedAt)}
-                    </p>
-                    <p>
-                      <span className="font-medium text-gray-700">End Date:</span>{" "}
-                      {formatTaskDate(task.endsAt)}
-                    </p>
-                    <p>
-                      <span className="font-medium text-gray-700">Days Left:</span>{" "}
-                      {getDaysLeftLabel(task.endsAt)}
-                    </p>
+                  {/* Core Info Grid */}
+                  <div className="grid grid-cols-2 gap-y-3 gap-x-2 mb-5">
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Start Date</p>
+                      <p className="text-sm font-medium text-gray-900">{formatTaskDate(task.startedAt)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">End Date</p>
+                      <p className="text-sm font-medium text-gray-900">{formatTaskDate(task.endsAt)}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Time Remaining</p>
+                      <p className="text-sm font-medium text-gray-900">{getDaysLeftLabel(task.endsAt)}</p>
+                    </div>
                   </div>
 
-                  <div className="mb-4 rounded-lg border border-orange-200 bg-orange-50 p-3">
-                    <p className="text-xs font-semibold text-orange-800">
-                      Streak: {Number(task.streak?.count) || 0}
+                  {/* Streak Block */}
+                  <div className="mb-5 rounded-xl border border-orange-100 bg-orange-50/50 p-4">
+                    <div className="flex items-center justify-between mb-2">
+                       <p className="text-sm font-bold text-orange-800 flex items-center gap-1.5">
+                         🔥 Streak: {Number(task.streak?.count) || 0}
+                       </p>
+                       <span className="text-xs font-medium bg-orange-100 text-orange-800 px-2 py-0.5 rounded">
+                         {task.duration} days total
+                       </span>
+                    </div>
+                    <p className="text-xs text-orange-700/80 font-medium">
+                      Updated: {formatTaskDate(task.streak?.lastUpdatedAt)}
                     </p>
-                    <p className="text-xs text-orange-700 mt-1">
-                      Last Updated: {formatTaskDate(task.streak?.lastUpdatedAt)}
-                    </p>
-                    <p className="text-xs text-orange-700 mt-1">
+                    <p className="text-xs text-orange-700/80 font-medium mt-0.5">
                       {getStreakWindowLabel(task.streak?.lastUpdatedAt)}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                      ⏱ {task.duration} days
-                    </span>
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded capitalize">
-                      👑 {isCreator ? "You Created" : `By ${creatorName}`}
-                    </span>
-
-                  </div>
-
+                  {/* Payment Warnings */}
                   {effectiveStatus === "waiting_for_payment" && unpaidUsers.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-xs font-semibold text-yellow-700 mb-2">Pending Payment From:</p>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="mb-5 border border-amber-200 bg-amber-50 rounded-xl p-4">
+                      <p className="text-xs font-bold text-amber-800 mb-2 uppercase tracking-wider">Pending Payment From</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {unpaidUsers.map((userLabel, index) => (
                           <span
                             key={`${task._id}-pending-${index}`}
-                            className="text-xs px-2 py-1 rounded-md bg-yellow-100 text-yellow-800 border border-yellow-200"
+                            className="text-xs px-2 py-1 rounded bg-white border border-amber-200 text-amber-700 font-medium shadow-sm"
                           >
                             {userLabel}
                           </span>
@@ -273,47 +279,53 @@ const MyTasks = () => {
                   )}
 
                   {effectiveStatus === "expired" && (
-                    <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3">
-                      <p className="text-xs font-semibold text-red-800">
-                        Your task has expired and you can collect the {expiredPercent.toFixed(2)}%
-                        amount of your total invested amount by contacting admin.
+                    <div className="mb-5 border border-red-200 bg-red-50 rounded-xl p-4">
+                      <p className="text-sm font-medium text-red-800 leading-relaxed">
+                        Task expired. You can collect <span className="font-bold">{expiredPercent.toFixed(1)}%</span> of your investment by contacting admin.
                       </p>
-                      <p className="text-xs text-red-700 mt-1">
+                      <p className="text-sm font-bold text-red-700 mt-2">
                         Collectable: ₹{collectableAmount.toFixed(2)}
                       </p>
                     </div>
                   )}
 
-                  {effectiveStatus === "in_progress" && (
-                    <div className="mb-4">
-                      <button
-                        onClick={() => contributeMutation.mutate(task._id)}
-                        disabled={!canContribute || isContributingThisTask}
-                        className={`w-full rounded-lg px-3 py-2 text-sm font-medium transition ${
-                          canContribute
-                            ? "bg-green-600 text-white hover:bg-green-700"
-                            : "bg-gray-100 text-gray-500 cursor-not-allowed"
-                        }`}
-                      >
-                        {isContributingThisTask
-                          ? "Submitting..."
-                          : hasContributedToday
-                          ? "Contribution Submitted Today"
-                          : "Contribute to Task"}
-                      </button>
-                    </div>
-                  )}
+                  <div className="mt-auto pt-2">
+                      {effectiveStatus === "in_progress" && (
+                        <button
+                          onClick={() => contributeMutation.mutate(task._id)}
+                          disabled={!canContribute || isContributingThisTask}
+                          className={`w-full rounded-lg px-4 py-2.5 text-sm font-bold transition shadow-sm ${
+                            canContribute
+                              ? "bg-blue-600 text-white hover:bg-blue-700 hover:shadow"
+                              : "bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-200"
+                          }`}
+                        >
+                          {isContributingThisTask
+                            ? "Submitting..."
+                            : hasContributedToday
+                            ? "✓ Contribution Logged"
+                            : "Log Daily Contribution"}
+                        </button>
+                      )}
+                  </div>
                 </div>
 
-                <div className="border-t pt-4 mt-auto">
-                  <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wider">
-                    Participants ({task.participants?.length || 0})
-                  </p>
+                {/* Footer section */}
+                <div className="border-t border-gray-100 mt-5 pt-4 bg-gray-50/50 -mx-6 -mb-6 px-6 pb-6">
+                  <div className="flex items-center justify-between mb-3">
+                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                       Participants ({task.participants?.length || 0})
+                     </p>
+                     <span className="text-xs font-medium text-gray-500 capitalize">
+                        {isCreator ? "Created by You" : `By ${creatorName}`}
+                     </span>
+                  </div>
+                  
                   <div className="flex flex-wrap gap-2">
                     {task.participants?.map((participant) => (
                       <span
                         key={participant._id}
-                        className="text-xs px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-gray-700"
+                        className="text-xs px-2.5 py-1 bg-white border border-gray-200 rounded-md text-gray-700 font-medium shadow-sm"
                         title={participant.name || participant.username}
                       >
                         @{participant.username}

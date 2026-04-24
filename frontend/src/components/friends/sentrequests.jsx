@@ -13,7 +13,6 @@ const fetchRequests = async () => {
       withCredentials: true,
     }
   );
-
   return res.data.friendships;
 };
 
@@ -26,66 +25,70 @@ const Friendrequests = () => {
   });
 
   if (isLoading) return <Loader />;
-  if (error) return <h3 className="text-red-500">Something went wrong 😕</h3>;
+  if (error) return <h3 className="text-red-500 text-center mt-10">Something went wrong 😕</h3>;
 
   const requests = data?.filter(f => f.status === "Requested" && f.user1._id === userid);
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-    =
-      <h1 className="text-2xl font-bold text-black mb-6">
-        Sent Friend Requests
-      </h1>
+    <div className="w-full max-w-4xl mx-auto p-4 py-8 sm:px-6 lg:px-8">
+      
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Sent Requests</h1>
+        <p className="text-sm text-gray-500 mt-1">Manage friend requests you have sent to others.</p>
+      </div>
 
-     
-      <div className="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full border-collapse">
-          <thead className="bg-black">
-            <tr>
-              <th className="text-left px-6 py-4 text-white text-sm uppercase tracking-wider">
-                Username
-              </th>
-              <th className="text-right px-6 py-4 text-white text-sm uppercase tracking-wider">
-                Status
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {requests?.length === 0 ? (
+      <div className="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left">
+            <thead className="bg-slate-50 border-b border-gray-200">
               <tr>
-                <td
-                  colSpan="2"
-                  className="text-center py-6 text-gray-500"
-                >
-                  No pending requests
-                </td>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  User
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
+                  Status
+                </th>
               </tr>
-            ) : (
-              requests.map((f) => {
-                // Handle the case where user2 is an array
-                const friend = Array.isArray(f.user2) ? f.user2[0] : f.user2;
+            </thead>
 
-                return (
-                  <tr
-                    key={f._id}
-                    className="border-b hover:bg-gray-50 transition"
-                  >
-                    <td className="px-6 py-4 text-black font-medium">
-                      {(friend && friend.username) || "-"}
-                    </td>
+            <tbody className="divide-y divide-gray-100">
+              {(!requests || requests.length === 0) ? (
+                <tr>
+                  <td colSpan="2" className="px-6 py-12 text-center text-gray-500 text-sm">
+                    No pending requests sent.
+                  </td>
+                </tr>
+              ) : (
+                requests.map((f) => {
+                  const friend = Array.isArray(f.user2) ? f.user2[0] : f.user2;
+                  const displayName = friend?.name || friend?.username || "-";
 
-                    <td className="px-6 py-4 text-right">
-                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-600">
-                        Requested
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                  return (
+                    <tr key={f._id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                           <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold shrink-0">
+                              {displayName.charAt(0).toUpperCase()}
+                           </div>
+                           <div>
+                             <p className="font-medium text-gray-900 text-sm">{displayName}</p>
+                             {friend?.username && <p className="text-xs text-gray-500">@{friend.username}</p>}
+                           </div>
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4 text-right">
+                        <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-md bg-yellow-50 text-yellow-700 border border-yellow-200">
+                          Pending
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
