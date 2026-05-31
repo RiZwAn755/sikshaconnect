@@ -6,6 +6,16 @@ function PayButton({ amountvalue = 25, taskId }) {
   const amountNumeric = Number(amountvalue);
 
   const payNow = async () => {
+    if (!key) {
+      alert("Payment is temporarily unavailable. Razorpay key is not configured.");
+      return;
+    }
+
+    if (!window.Razorpay) {
+      alert("Payment SDK failed to load. Please refresh and try again.");
+      return;
+    }
+
     const { data: order } = await axios.post(
       `${baseUrl}/api/payment/create-order`,
       { amount: amountNumeric },

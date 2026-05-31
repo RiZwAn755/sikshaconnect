@@ -7,12 +7,17 @@ import { reset_token_secret, refresh_token_secret} from "../config/config.js";
 
 const isProduction = process.env.NODE_ENV === "production";
 
-// Cookie options: strict + secure in production, lax + insecure in dev
-// (SameSite=strict cannot be used cross-origin in local dev with different ports)
+// For cross-origin frontend/backend on Vercel, production cookies must be SameSite=None + Secure.
 const cookieOptions = {
   httpOnly: true,
-  secure: isProduction,          // HTTPS only in production
-  sameSite: isProduction ? "strict" : "lax",
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+};
+
+const clearCookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
 };
 
 export const signup = async (req, resp) => {
@@ -80,8 +85,8 @@ export const logout = async (req, resp) => {
       await user.save();
     }
   }
-  resp.clearCookie("accessToken", cookieOptions);
-  resp.clearCookie("refreshToken", cookieOptions);
+  resp.clearCookie("accessToken", clearCookieOptions);
+  resp.clearCookie("refreshToken", clearCookieOptions);
 
   resp.json({ message: "logged out successfully" });
 };

@@ -9,14 +9,22 @@ export default function PrivateComponent() {
   const [isAuthorized, setIsAuthorized] = useState(null);
 
   useEffect(() => {
+    const userid = localStorage.getItem("userid");
+    if (!userid) {
+      setIsAuthorized(false);
+      navigate("/landing");
+      return;
+    }
+
     axios
       .get(`${baseUrl}/api/auth/refresh`, { withCredentials: true })
       .then(() => setIsAuthorized(true))
       .catch(() => {
         setIsAuthorized(false);
+        localStorage.removeItem("userid");
         navigate("/landing");
       });
-  }, []);
+  }, [navigate]);
 
   if (isAuthorized === null)  return null;
 

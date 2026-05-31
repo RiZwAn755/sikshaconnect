@@ -14,8 +14,26 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+const configuredOrigins = (process.env.FRONTEND_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const corsOptions = {
-  origin: [process.env.FRONTEND_ORIGIN || "http://localhost:5173", "https://sikshaconnect.vercel.app"],
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const isConfiguredOrigin = configuredOrigins.includes(origin);
+    const isVercelPreview = /^https:\/\/sikshaconnect.*\.vercel\.app$/.test(origin);
+
+    if (isConfiguredOrigin || isVercelPreview) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
 };
 
